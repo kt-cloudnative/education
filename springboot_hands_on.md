@@ -758,7 +758,7 @@ api 폴더 아래에 생성합니다.
 
 <img src="./assets/rest_api4.png" style="width: 80%; height: auto;"/>  
 
-../api/FirstApiController
+../api/FirstApiController.java
 ```java
 package com.kt.edu.firstproject.api;
 
@@ -1547,13 +1547,4 @@ send를 클릭하면 아래와 같이 에러가 발생하고 rollback 이 된다
 <br/>
 
 
-## Security 
-
-
-<br/> 
-
-
-[ Security 문서보기로 이동하기 ](./security.md)       
-
-<br/>
 

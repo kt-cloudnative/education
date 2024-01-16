@@ -34,9 +34,9 @@ JPA는 자바 어플리케이션에서 관계형 데이터베이스를 어떻게
 
 JPA는 단순히 명세이기 때문에 구현이 없습니다.  
 
-JPA를 정의한 javax.persistence 패키지의 대부분은 interface , enum , Exception, 그리고  Annotation 들로 이루어져 있습니다.  
+JPA를 정의한 jakarta.persistence 패키지의 대부분은 interface , enum , Exception, 그리고  Annotation 들로 이루어져 있습니다.  
 
-JPA의 핵심이 되는 EntityManager 는 아래와 같이 javax.persistence 패키지 안에 interface 로 정의되어 있습니다.  
+JPA의 핵심이 되는 EntityManager 는 아래와 같이 jakarta.persistence 패키지 안에 interface 로 정의되어 있습니다.  
 
 JPA를 사용하기 위해서는 JPA를 구현한 Hibernate, EclipseLink, DataNucleus 같은 ORM 프레임워크를 사용해야 합니다.
 
@@ -299,7 +299,8 @@ Article class에 entity를 작성한다.  DTO와 유사하다.
 ```java
 package com.kt.edu.firstproject.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 
 @Entity //DB가 해당 객체를 인식 가능
 public class Article {
@@ -592,7 +593,7 @@ plugins를 활성화 하기 위해서 Preferences > Build, Execution, Deployment
 
 Intellij 2020.3 버전부터는 Lombok Plugin을 기본으로 제공하고 있습니다.   
 
-ArticleForm java 화일에서 생성사와 toString을 지우고 Annotation을 추가한다.  
+ArticleForm java 화일에서 생성자와 toString을 지우고 Annotation을 추가한다.  
 
 붉은색으로 글씨가 나오기 때문에 import class를 해준다.  
 
@@ -624,7 +625,7 @@ Article 화일도 수정한다.
 ```java
 package com.kt.edu.firstproject.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @AllArgsConstructor
@@ -675,7 +676,7 @@ ArticleController가 있기 때문에 아래 처럼 추가합니다.
 ```java
 ...
 @Controller
-@Slf4j
+@Slf4j // log 에러시 추가
 public class ArticleController {
     ...
     @GetMapping("/articles/{id}") // 해당 URL요청을 처리 선언
@@ -722,6 +723,7 @@ show 매개변수에  model 을 추가한다.
 
 ../controller/ArticleController
 ```java
+@GetMapping("/articles/{id}") // 해당 URL요청을 처리 선언
 public String show(@PathVariable Long id, Model model) { // URL에서 id를 변수로 가져옴
         log.info("id = " + id);
 
@@ -739,12 +741,16 @@ articles 폴더에 show 라는 mustache 파일이 있다고 가정한다.
 
 ../controller/ArticleController
 ```java
-      // 1: id로 데이터를 가져옴!
+    @GetMapping("/articles/{id}") // 해당 URL요청을 처리 선언
+    public String show(@PathVariable Long id, Model model) { // URL에서 id를 변수로 가져옴
+        log.info("id = " + id);
+
+        // 1: id로 데이터를 가져옴!
         Article articleEntity = articleRepository.findById(id).orElse(null);  // orElse는 데이터가 없으면 다른 값 return
         // 2: 가져온 데이터를 모델에 등록!
         model.addAttribute("article", articleEntity);
-        // 3: 보여줄 페이지를 설정!
         return "articles/show";
+    }
  ```  
 
  mustache 화일을 만들기 위해서 resources > templates > articles 폴더로 이동하여 New > File 선택하고 화일명을 입력한다.  
@@ -1329,6 +1335,8 @@ HTTP와  매핑되는 SQL 기능
 데이터를 계속 넣어주는 번거로움을 피하기 위해  더미 데이터를 sql로 작성합니다.  
 이렇게 작성을 하면 재기동시에 아래 구문이 실행이 되고 H2 DB에 저장이 된다.  
 
+<br/>
+
 ../resources/data.sql
 ```sql
 INSERT INTO article(id, title, content) VALUES(1, '1', '테스트 1');
@@ -1336,13 +1344,16 @@ INSERT INTO article(id, title, content) VALUES(2, '2', '테스트2');
 INSERT INTO article(id, title, content) VALUES(3, '3', '테스트 3');
 ```  
 
+<br/>
+
 추가적으로 application.properties에 아래 구문을 추가한다.  
 
 ../resources/application.properties
 ```
 # data.sql 적용을 위한 설정(스프링부트 2.5 이상 필수)
 spring.jpa.defer-datasource-initialization=true
-```
+```  
+
 재기동 하고 웹브라우저에 http://localhost:8080/articles 를 입력하면
 데이터가 3건 들어가 있는 것을 확인 할 수 있다.  
 
@@ -1630,7 +1641,7 @@ logging.level.org.hibernate.SQL=DEBUG
 ## 이쁘게 보여주기
 spring.jpa.properties.hibernate.format_sql=true
 ## 파라미터 보여주기
-logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+logging.level.org.hibernate.orm.jdbc.bind=TRACE
 ## 고정 H2 DB url 설정
 spring.datasource.url=jdbc:h2:mem:testdb
 ```  
