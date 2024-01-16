@@ -66,7 +66,7 @@ DB에 질의할 쿼리문을 관리하는 Mapper파일에 요청한다.
 
 <br/>
 
-웹브라우저에서 https://start.spring.io/ 접속하여 아래와 같이 라이브러리를 추가하여 신규 프로젝트를 생성한다.  
+웹브라우저에서 https://start.spring.io/ 접속하여 아래와 같이 라이브러리를 추가하여 신규 프로젝트를 생성한다.   
 
 <img src="./assets/mybatis1.png" style="width: 80%; height: auto;"/> 
 
@@ -77,9 +77,6 @@ IntelliJ 메뉴 File > New > Project from Existing Sources 으로 이동하여 �
 
 <img src="./assets/mybatis2.png" style="width: 80%; height: auto;"/> 
 
-<br/>
-
-사내 환경에 맞추기 위하여 pom.xml 을 오픈한 후  springboot 버전을  2.6.3 으로 변경 한다.  
 
 <br/>
 
@@ -100,6 +97,8 @@ create table article
 alter table article add constraint article_pk primary key (id);  
 ```  
 
+
+<br/>
 
 데이터 생성 data.sql  
 
