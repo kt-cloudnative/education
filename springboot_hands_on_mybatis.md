@@ -777,77 +777,22 @@ SQL, 수행시간, Table을 확인 할 수 있습니다.
 
 <br/>
 
-Rest Api 문서화를 위한 Spring Boot Swagger 3 를 설정합니다.  
+Rest Api 문서화를 위한 Spring Boot Springdoc Swagger  를 설정합니다.  
 
 먼저 pom.xml 화일에 swagger dependency로 추가한다.
 
 ```xml
-		<!-- swagger 3 -->
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-boot-starter</artifactId>
-			<version>3.0.0</version>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.3.0</version>
 		</dependency>
 		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>3.0.0</version>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+			<version>2.3.0</version>
 		</dependency>
 ```  
-
-<br/>
-
-config 설정을 위하여 project 상단 폴더 밑에 SwaggerConfig class를 생성합니다.  
-
-basepackage는 com.kt.edu 로 설정합니다.  
-
-<br/> 
-
-<img src="./assets/swagger2.png" style="width: 80%; height: auto;"/>
-
-<br/>
-
-../SwaggerConfig.java   
-```java
-package com.kt.edu.secondproject;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-
-@Configuration
-@EnableWebMvc
-public class SwaggerConfig {
-
-    @Bean
-    public Docket swaggerAPI(){
-        //Docket : swagger Bean
-        return new Docket(DocumentationType.OAS_30)
-                .useDefaultResponseMessages(true) //기본 응답 메시지 표시 여부
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.kt.edu")) //swagger탐색 대상 패키지
-                .paths(PathSelectors.any())
-                .build()
-                .apiInfo(apiInfo());
-    }
-
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("kt Caravan Swagger")
-                .description("Education swagger")
-                .version("1.0")
-                .build();
-    }
-
-}
-```  
-
 
 <br/>
 
@@ -877,18 +822,14 @@ Execute 버튼을 클릭하면 API 호출이 되고 Resonse 값을 JSON으로 �
 
 <br/>
 
-swagger 2.0과 3.0의 차이  
-
-- config  
-    @EnableSwagger2 : swagger 2.0 버전   
-    @EnableWebMvc : swagger 3.0 버전  
 
 - url  
-    2.X.X  :  http://localhost:8080/swagger-ui.html  
-    3.X.X  :  http://localhost:8080/swagger-ui/index.html    
+    3.X.X  :  http://localhost:8080/swagger-ui/index.html      
 
 
-### 로그 변경 및 swagger 변경    
+<br/>>
+
+### 로그 변경 및 swagger 세부 설정   
 
 <br/>
 
@@ -896,54 +837,8 @@ swagger 2.0과 3.0의 차이
 
 pom 화일을 변경하지 않고 log4j2를 설정하면 Multi Bind 오류가 발생하기 때문에 아래와 같이 기존 log를 exclusion tag를 사용하여 제외하고  log4j2 라이브러리를 추가한다.    
 
-swagger는 springfox 에서 openapi 로 변경한다.  
-
-최근에는 springfox 보다 openapi를 많이 사용하는 추세.
-
-    
-pom.xml
-```xml
-...
-<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-            <!-- 기존 logback 제외 -->
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<!-- spring log4j2 -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
-
-        <!-- swagger 3 -->
-		<!--dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-boot-starter</artifactId>
-			<version>3.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>3.0.0</version>
-		</dependency-->
-
-		<!-- Open API 3 -->
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.6</version>
-		</dependency>
-...
-```  
-
 <br/>
+
 
 이번 부터는  application.properties 대신에 application.yml 화일을 사용한다.  
 
@@ -1109,7 +1004,7 @@ log4j2.xml 에서 로그 세부 설정을 할 수 있다.
 <Configuration status="INFO">
 
     <Properties>
-        <Property name="logFileName">edu10-1</Property>
+        <Property name="logFileName">mybatis-1</Property>
         <!-- 디폴트 로깅시-->
         <Property name="consoleLayout">${logFileName} %d{HH:mm:ss.SSS} %-5level %c : - %enc{%msg}{CRLF} %n%throwable</Property>
         <!-- <Property name="consoleLayout">${logFileName} %style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: - %msg%n%throwable</Property> -->
@@ -1231,7 +1126,7 @@ log4j2.xml 에서 로그 세부 설정을 할 수 있다.
 ```java
 package com.kt.edu.secondproject.config;
 
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -1244,7 +1139,6 @@ import io.swagger.v3.oas.models.info.License;
 @Configuration
 public class OpenApiConfig {
 
-    // value annotation은 application.yml 의 값을 가져온다.
     @Value("${spring.application.name}")
     private String group;
 
@@ -1289,6 +1183,7 @@ public class OpenApiConfig {
     }
 
 }
+
 ```  
 
 <br/>
@@ -1350,7 +1245,7 @@ IntelliJ로 이동하면 console 창에 아래와 같이 로그를 확인 할 �
 <br/>
 
 소스는 아래를 참고 한다.  
-- https://github.com/shclub/edu10-1
+- https://github.com/kt-cloudnative/springboot_mybatis_2
 
 
 <br/>
