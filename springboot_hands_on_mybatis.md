@@ -68,7 +68,7 @@ DB에 질의할 쿼리문을 관리하는 Mapper파일에 요청한다.
 
 웹브라우저에서 https://start.spring.io/ 접속하여 아래와 같이 라이브러리를 추가하여 신규 프로젝트를 생성한다.   
 
-<img src="./assets/mybatis1.png" style="width: 80%; height: auto;"/> 
+<img src="./assets/mybatis1-1.png" style="width: 80%; height: auto;"/> 
 
 <br/>
 
