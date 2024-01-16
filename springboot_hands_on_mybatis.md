@@ -515,12 +515,12 @@ resources 폴더에 mapper 디렉토리를 생성하고 ArticleMapper xml 화일
 
 <mapper namespace="com.kt.edu.secondproject.repository.ArticleMapper">
     <select id="getId" resultType="long">
-        select hibernate_sequence.nextval from dual
+        select nextval ('hibernate_sequence')
     </select>
 
     <insert id="insert" parameterType="Article">
         <selectKey keyProperty="id" resultType="long" order="BEFORE">
-            select hibernate_sequence.nextval from dual
+            select nextval ('hibernate_sequence')
         </selectKey>
         insert into article
         (id, title, content)
@@ -599,6 +599,8 @@ Talend API Tester로 설정값을 입력해 봅니다.
         "content" : "4번 test 합니다."
     }
     ```  
+
+<br/>>
 
 위와 같이 설정하고 send 버튼을 4번 누르면 데이터가 정상으로 입력이 됩니다.  
 - pk 오류가 발생하고 sequence 가 4까지 증가하면 에러 발생 안함.  
