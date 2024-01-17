@@ -787,11 +787,6 @@ Rest Api 문서화를 위한 Spring Boot Springdoc Swagger  를 설정합니다.
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.3.0</version>
 		</dependency>
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
-			<version>2.3.0</version>
-		</dependency>
 ```  
 
 <br/>
