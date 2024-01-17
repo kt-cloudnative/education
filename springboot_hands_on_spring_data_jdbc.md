@@ -98,7 +98,7 @@ spring-boot-starter-data-jdbc 의존성과 사용할 db client를 추가하면 �
 
 웹브라우저에서 https://start.spring.io/ 접속하여 아래와 같이 라이브러리를 추가하여 신규 프로젝트를 생성한다.  
 
-<img src="./assets/spring_data_jdbc_ho1.png" style="width: 80%; height: auto;"/> 
+<img src="./assets/spring_data_jdbc_1.png" style="width: 80%; height: auto;"/> 
 
 <br/>
 
@@ -109,7 +109,6 @@ IntelliJ 메뉴 File > New > Project from Existing Sources 으로 이동하여 �
 
 <br/>
 
-사내 환경에 맞추기 위하여 pom.xml 을 오픈 한 후 springboot 버전을  2.6.3 으로 변경 한다.  
 
 pom 파일에 의존성을 아래와 같이 추가한다.  
 
@@ -172,8 +171,8 @@ pom.xml
 		<!-- Open API 3 -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.6</version>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.3.0</version>
 		</dependency>
 
 		<dependency>
@@ -268,7 +267,7 @@ management:
 # app
 app-info:
   app-name: "edu-spring-data-jdbc"
-  title: "Caravan Edu API"
+  title: "Cloud Native Edu API"
   build:
     version: '@project.version@'
     timestamp: '@app.build.timestamp@'
@@ -657,7 +656,7 @@ swagger config 클래스를 생성합니다.
 ```java
 package com.kt.edu.thirdproject.config;
 
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
