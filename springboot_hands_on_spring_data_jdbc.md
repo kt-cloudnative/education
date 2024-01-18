@@ -409,14 +409,14 @@ resources 폴더에 추가적으로 3개 화일을 생성합니다.
 
 ../resources/banner.txt    
 ```bash
-   _____                                                    ______   _____    _    _
-  / ____|                                                  |  ____| |  __ \  | |  | |
- | |        __ _   _ __    __ _  __   __   __ _   _ __     | |__    | |  | | | |  | |
- | |       / _` | | '__|  / _` | \ \ / /  / _` | | '_ \    |  __|   | |  | | | |  | |
- | |____  | (_| | | |    | (_| |  \ V /  | (_| | | | | |   | |____  | |__| | | |__| |
-  \_____|  \__,_| |_|     \__,_|   \_/    \__,_| |_| |_|   |______| |_____/   \____/
-
-:: Spring Boot ${spring-boot.version} ::
+    ____ _                 _   _   _       _   _             _____ ____  _   _ 
+  / ___| | ___  _   _  __| | | \ | | __ _| |_(_)_   _____  | ____|  _ \| | | |
+ | |   | |/ _ \| | | |/ _` | |  \| |/ _` | __| \ \ / / _ \ |  _| | | | | | | |
+ | |___| | (_) | |_| | (_| | | |\  | (_| | |_| |\ V /  __/ | |___| |_| | |_| |
+  \____|_|\___/ \__,_|\__,_| |_| \_|\__,_|\__|_| \_/ \___| |_____|____/ \___/ 
+                                                                              
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}
 ```  
 
 <br/> 
@@ -621,11 +621,15 @@ public class CacheConfig {
 
 <br/>
 
+자동으로 import 되는 package 명이 있는데 springboot cache 가 기본으로 설정 되어있기 때문이고 cachetype 을 지우면 에러가 발생하지 않는다.    
+참고 : https://myborn.tistory.com/24
+
+<br/>
+
 ../config/CacheType.java 
 ```java
 package com.kt.edu.thirdproject.config;
 
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -648,6 +652,7 @@ public enum CacheType {
 ```  
 
 <br/>
+
 swagger config 클래스를 생성합니다.
 
 <br/>
@@ -719,6 +724,8 @@ public class OpenApiConfig {
 <br/>
 
 controller 패키지에 ArticleController 를 RestController 로 생성합니다.  
+
+<br/>
 
 ../controller/ArticleController.java  
 ```java
@@ -950,7 +957,7 @@ Talend API Tester로 설정값을 입력해 봅니다.
 
 <br/> 
 
-우리는 지금 cache를 적용을 했고 DB와 Cache간의 동기화 시간은 30분 이기 때문에 다시 조회하면
+우리는 지금 cache를 적용을 했고 DB와 Cache간의 동기화 시간은 5분 이기 때문에 다시 조회하면
 전체 데이터가 나와야 합니다.  
 
 <img src="./assets/spring_data_jdbc_talend4.png" style="width: 80%; height: auto;"/> 

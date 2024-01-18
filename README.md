@@ -7,7 +7,6 @@
 <br/>
 
 
-
 1. Chapter 1 : 1주차    ( [가이드 문서보기](./chapter1.md) ) 
 
      - SpringBoot 개념 설명 
@@ -74,10 +73,14 @@
 
      - SpringBoot 계속
 
-          -  Spring Security [ Hands-On 문서보기 ](./spring_security.md)    
-               - JWT / OAuth 연동
-               - Frontend ( Vue / React ) simple example 
+          -  Spring Security 5.x [ Hands-On 문서보기 ](./spring_security_1.md)    
+               - JWT  연동
+               - Frontend ( React )  example 
 
+          -  Spring Security 6.x [ Hands-On 문서보기 ](./spring_security_2.md)    
+               - JWT
+               - Frontend ( Vue )  example 
+               - 과제 : JWT -> OAuth 연동 전환
 
           -  IoC 와 DI
           -  AOP
@@ -90,17 +93,17 @@
 
           - 샘플 소스 ( React Front without security ): [ 소스 보기 ](https://github.com/kt-cloudnative/react_crud_simple)  
 
-          - 샘플 소스 ( SpringBoot  without security ): [ 소스 보기 ](https://github.com/kt-cloudnative/springboot_crud_simple)
+          - 샘플 소스 ( SpringBoot without security ): [ 소스 보기 ](https://github.com/kt-cloudnative/springboot_crud_simple)
 
      <br/>
 
      - CRUD With Security
 
-          - 샘플 소스 ( React Front with security ): [ 소스 보기 ](https://github.com/kt-cloudnative/react_crud_token)
+          - 샘플 소스 ( React Front with security ): [ 소스 보기 ](https://github.com/kt-cloudnative/react_crud_security)
 
-          - 샘플 소스 ( Vue Front with security ): [ 소스 보기 ](https://github.com/kt-cloudnative/vue_crud_token)
+          - 샘플 소스 ( Vue Front with security ): [ 소스 보기 ](https://github.com/kt-cloudnative/vue_crud_security)
 
-          - 샘플 소스 ( SpringBoot with security ): [ 소스 보기  ](https://github.com/kt-cloudnative/springboot_crud_token)
+          - 샘플 소스 ( SpringBoot with security ): [ 소스 보기  ](https://github.com/kt-cloudnative/springboot_crud_security)
 
      <br/>
 

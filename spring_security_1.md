@@ -1,25 +1,28 @@
-#  Security 
+#  Spring Security 1 ( SpringBoot 2.x, SpringBoot Security 5.x)
  
-React 와 SpringBoot를 연동하면서 security 활용 방법에 대해서 실습한다.  
+ 
+Vue/React 와 SpringBoot를 연동하면서 security 활용 방법에 대해서 실습한다.  
 
 
-1. Spring Security
+1. Spring Security  ( SpringBoot 2.x )
 
 1. 프로젝트 생성 및 환경 설정
 
 3. 실행해보기
 
 4. 소스위치   
-  - 배포 : https://github.com/shclub/edu12
   - 보안 없음
-    - React ( 사원 정보 ) :https://github.com/shclub/edu12-1
-    - SpringBoot ( 사원 정보 ) : https://github.com/shclub/edu12-2
-  - 보안 추가
-    - React ( 사원 정보 ) : https://github.com/shclub/edu12-3
-    - SpringBoot ( 사원 정보 ) : https://github.com/shclub/edu12-4
+    - React ( 사원 정보 ) :https://github.com/kt-cloudnative/react_crud_simple
+    - SpringBoot 2.x ( 사원 정보 ) : https://github.com/kt-cloudnative/springboot_crud_simple  
 
+  - 보안 추가
+    - React ( 사원 정보 ) : https://github.com/kt-cloudnative/react_crud_security
+    - vue 3.x ( 사원 정보 ) : https://github.com/kt-cloudnative/vue_crud_security
+    - SpringBoot 2.x ( 사원 정보 ) : https://github.com/kt-cloudnative/springboot_crud_security_old
+    - SpringBoot 3.x ( 사원 정보 ) : https://github.com/kt-cloudnative/springboot_crud_security
+    
 5. 참고
-  - Sprint Security 
+  - Sprint Security 5.x
     - https://doozi0316.tistory.com/entry/Spring-Security-Spring-Security%EC%9D%98-%EA%B0%9C%EB%85%90%EA%B3%BC-%EB%8F%99%EC%9E%91-%EA%B3%BC%EC%A0%95?category=925594
     - https://coding-start.tistory.com/153  
 
@@ -34,6 +37,7 @@ React 와 SpringBoot를 연동하면서 security 활용 방법에 대해서 실�
   - jwt + oauth 2.0 : https://velog.io/@tmdgh0221/Spring-Security-%EC%99%80-OAuth-2.0-%EC%99%80-JWT-%EC%9D%98-%EC%BD%9C%EB%9D%BC%EB%B3%B4
   - 토큰인증 vs 세션 인증 : https://mangkyu.tistory.com/55
   - React + SpringBoot + oauth2 :  https://dodop-blog.tistory.com/249
+  - https://adjh54.tistory.com/92
 
 <br/>
 
@@ -301,14 +305,14 @@ v14.19.3
 github 에서 react 소스를 다운 받습니다.  
 
 ```bash
-jakelee@jake-MacBookAir Downloads % git clone https://github.com/shclub/edu12-3.git
+jakelee@jake-MacBookAir Downloads % git clone https://github.com/kt-cloudnative/react_crud_security.git
 ```  
 
-edu12-3 폴더로 이동하여 빌드 ( install ) 하고 start 합니다.  
+react_crud_security 폴더로 이동하여 빌드 ( install ) 하고 start 합니다.  
    
 ```bash
-jakelee@jake-MacBookAir edu12-3 % npm install
-jakelee@jake-MacBookAir edu12-3 % npm start
+jakelee@jake-MacBookAir react_crud_security % npm install
+jakelee@jake-MacBookAir react_crud_security % npm start
 ```  
 
 브라우저에서 http://localhost:3000 을 입력하면 아래와 같은 로그인 화면이 보입니다.  
@@ -456,14 +460,14 @@ LoginApp.jsx 에서는 API 별로 Route와 AuthenticatedRoute 분리
 
 <br/>
 
-###  SpringBoot Backend 구성    
+###  SpringBoot Backend 구성  ( SpringBoot 2.x  , Spring Security 5.x)
 
 <br/>
 
 github 에서 SpringBoot 소스를 다운 받습니다.  
 
 ```bash
-jakelee@jake-MacBookAir Downloads % git clone https://github.com/shclub/edu12-4.git
+jakelee@jake-MacBookAir Downloads % git clone hhttps://github.com/kt-cloudnative/springboot_crud_security_old.git
 ```  
 
 IntelliJ 에서 해당 소스를 오픈 합니다.  
@@ -497,6 +501,8 @@ security를 위해 dependency가 추가 된것 을 확인합니다.
 			<artifactId>jjwt</artifactId>
 			<version>0.9.1</version>
 		</dependency>
+
+		<!-- springboot 2.x용 jaxb -->
 
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
@@ -543,6 +549,7 @@ common 패키지에서 붉은 색으로  표기된 부분이 security 관련 Cla
 <img src="./assets/spring_security6.png" style="width: 80%; height: auto;"/>     
 
 <br/>
+
 jasypt 란   
 
 개발자가 암호화 작동 방식에 대한 깊은 지식 없이도 최소한의 노력으로 프로젝트에 기본 암호화 기능을 추가할 수 있도록 하는 Java 라이브러리 입니다.  
@@ -729,6 +736,7 @@ jwt:
 public class JwtTokenUtil implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+
     @Value("${jwt.secret}")
     private String secret;
 
@@ -824,7 +832,7 @@ public class JwtUserDetailsService implements UserDetailsService {
 }
 ```  
 
-- Spring Security 5.0에서는 Password를 BryptEncoder를 통해 Brypt화 하지만 우리는 SHA256으로 변경한다.  
+- Spring Security 5.0 에서는 Password를 BcryptEncoder를 통해 Bcrypt화 하지만 우리는 SHA256으로 변경한다.  
   - https://www.javainuse.com/onlineBcrypt 에서 user_pw를 Bcrypt화
 - id : user_id, pw: user_pw로 고정해 사용자 확인
 - 사용자 확인 실패시 throw Exception  
@@ -1058,7 +1066,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
-    //@Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         // configure AuthenticationManager so that it knows from where to load
         // user for matching credentials
@@ -1083,6 +1090,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(customAuthentictionProvider);
     }*/
 
+    // 정적 자원에 대해서 Security를 적용하지 않음으로 설정
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
@@ -1113,14 +1121,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new CorsFilter(source);
     }
 
+//HTTP에 대해서 ‘인증’과 ‘인가’를 담당하는 메서드이며 필터를 통해 인증 방식과 인증 절차에 대해서 등록하며 설정을 담당하는 메서드
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
 
-        // We don't need CSRF
+        // 서버에 인증정보를 저장하지 않기에 csrf를 사용하지 않는다.
         httpSecurity.csrf().disable()
                 //.cors().and()
                 // dont authenticate this particular request
+                // form 기반의 로그인에 대해 비 활성화하며 커스텀으로 구성한 필터를 사용한다.
+                 //       .formLogin().disable();
+                 // 토큰을 활용하는 경우 모든 요청에 대해 '인가'에 대해서 사용.
                 .authorizeRequests().antMatchers
                   //예외 API를 기입하다.
                         "/",
@@ -1138,6 +1150,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // make sure we use stateless session; session won't be used to
                 // store user's state.
                 //.exceptionHandling().authenticationEntryPoint((req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED)).and().sessionManagement()
+                // Session 기반의 인증기반을 사용하지 않고 추후 JWT를 이용하여서 인증 예정
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
@@ -1146,6 +1159,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.headers().frameOptions().disable();
 
         // Add a filter to validate the tokens with every request
+        // Spring Security JWT Filter Load
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
     }
@@ -1158,6 +1172,26 @@ cors 설정시 아래와 같이 applyPermitDefaultValues를 사용하면 GET, PO
 ```java
     httpSecurity.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
 ```
+
+<br/>
+
+AuthenticationManager는 authenticate 의 인증 메서드를 제공하는 매니져로'Provider'의 인터페이스를 의미  
+
+```java
+
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        // configure AuthenticationManager so that it knows from where to load
+        // user for matching credentials
+        // Use BCryptPasswordEncoder
+        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+    }
+
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
+```  
 
 <br/>
 
