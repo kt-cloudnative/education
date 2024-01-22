@@ -110,18 +110,19 @@
 
 3. Chapter 3 : 3주차  ( [가이드 문서보기](./chapter3.md) ) 
 
-     - Git 설치 및 활용 
-     - Docker 이해 및 활용 
+     - 실습 환경 구성 ( [환경](./install.md) )
+     - Git 
+     - Docker  
      - Swagger 실습 
      - Docker Compose 설치 및 활용 ( DB 연동 )  
-     - 샘플 소스 : [ 소스 보기 ](https://github.com/shclub/edu2)  
+     - 샘플 소스 : [ 소스 보기 ](https://github.com/kt-cloudnative/edu2)  
 
      <br/>
 
 4. Chapter 4 : 3주차  ( [가이드 문서보기](./chapter4.md) )  
 
      - VM 기반으로 Jenkins 설치 및 설정 , GitHub , Docker 계정 생성 , Jenkins Pipeline 생성하여 CI 실습  
-     - 샘플 소스 : [ 소스 보기 ](https://github.com/shclub/edu1)  
+     - 샘플 소스 : [ 소스 보기 ](https://github.com/kt-cloudnative/edu1)  
 
      <br/>
 
