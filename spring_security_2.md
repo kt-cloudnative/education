@@ -20,8 +20,10 @@ Vue 와 SpringBoot를 연동하면서 security 활용 방법에 대해서 실습
     
 5. 참고
   - Sprint Security 6.x
-    - 
-
+    - https://ksh-coding.tistory.com/m/70
+    - https://adjh54.tistory.com/m/221  
+    - Filter와 FilterChain : https://velog.io/@zini9188/Spring-Security-Filter%EC%99%80-FilterChain
+  
 
 <br/>
 
@@ -37,7 +39,7 @@ Vue & Spring Boot 연동.
 - Vue는 5173 port, Spring boot는 8080 port 사용
 
 Vue를 빌드 하기 위해 node.js 를 설치합니다.
-node 공식 페이지 ( https://nodejs.org/ko/download ) 접속 후 LTS 버전을 클릭하여 다운로드 하고 설치 합니다.  
+node 공식 페이지 ( https://nodejs.org/en/download ) 접속 후 LTS 버전을 클릭하여 다운로드 하고 설치 합니다.  
 
 아래와 같이 node version을 확인합니다.   
 

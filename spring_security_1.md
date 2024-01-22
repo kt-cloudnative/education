@@ -38,6 +38,7 @@ Vue/React 와 SpringBoot를 연동하면서 security 활용 방법에 대해서 
   - 토큰인증 vs 세션 인증 : https://mangkyu.tistory.com/55
   - React + SpringBoot + oauth2 :  https://dodop-blog.tistory.com/249
   - https://adjh54.tistory.com/92
+  - HttpRequest Body 채우기 : https://velog.io/@saint6839/Controller%EC%97%90%EC%84%9C-HttpRequest-Body-%EA%B0%92%EC%9D%80-%EC%99%9C-%EB%B9%84%EC%9B%8C%EC%A0%B8-%EC%9E%88%EC%9D%84%EA%B9%8C
 
 <br/>
 
@@ -291,7 +292,7 @@ React & Spring Boot 연동.
 - React는 3000 port, Spring boot는 8080 port 사용
 
 React를 빌드 하기 위해 node.js 를 설치합니다.
-node 공식 페이지 ( https://nodejs.org/ko/download ) 접속 후 LTS 버전을 클릭하여 다운로드 하고 설치 합니다.  
+node 공식 페이지 ( https://nodejs.org/en/download ) 접속 후 LTS 버전을 클릭하여 다운로드 하고 설치 합니다.  
 
 아래와 같이 node version을 확인합니다.   
 

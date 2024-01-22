@@ -108,3 +108,35 @@
      <br/>
 
 
+3. Chapter 3 : 3주차  ( [가이드 문서보기](./chapter3.md) ) 
+
+     - Git 설치 및 활용 
+     - Docker 이해 및 활용 
+     - Swagger 실습 
+     - Docker Compose 설치 및 활용 ( DB 연동 )  
+     - 샘플 소스 : [ 소스 보기 ](https://github.com/shclub/edu2)  
+
+     <br/>
+
+4. Chapter 4 : 3주차  ( [가이드 문서보기](./chapter4.md) )  
+
+     - VM 기반으로 Jenkins 설치 및 설정 , GitHub , Docker 계정 생성 , Jenkins Pipeline 생성하여 CI 실습  
+     - 샘플 소스 : [ 소스 보기 ](https://github.com/shclub/edu1)  
+
+     <br/>
+
+5. Chapter 3 : 4주차   ( [가이드 문서보기](./chapter5.md) )  
+
+     - kubernetes 설치 (k3s) 및 설정 , k8s 이해 및 활용
+     - kubernetes IDE 인 Lens 설치 및 사용법 실습   
+     - Helm 설치 및 helm으로 prometheus 설치 활용
+     - k8s hands-on Basic [ Hands-On 문서보기 ](./k8s_basic_hands_on.md)  
+
+          - 실습 전체 개요
+          - kubeconfig 설정 : kubectl 설치
+          - kubectl 활용
+          - kubernetes 리소스 ( Pod , Service , Deployment 생성 및 삭제)
+          - 배포 ( Rolling Update / Rollback )
+          - Serivce Expose ( Ingress )  
+
+     <br/>
