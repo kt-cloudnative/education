@@ -586,7 +586,7 @@ version: '3.3'
 
 services:
    db:
-     image: mysql:5.7
+     image: mariadb:10.6.16
      volumes:
        - ./mysql:/var/lib/mysql
      restart: always
@@ -603,7 +603,7 @@ services:
        - "40004:80"
      restart: always
      environment:
-       WORDPRESS_DB_HOST: db:3306 // mysql 기본 설정
+       WORDPRESS_DB_HOST: db:3306 // mariadb 기본 설정
        WORDPRESS_DB_USER: wordpress
        WORDPRESS_DB_PASSWORD: wordpress
        WORDPRESS_DB_NAME: wordpress
