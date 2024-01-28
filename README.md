@@ -126,7 +126,7 @@
 
      <br/>
 
-5. Chapter 3 : 4주차   ( [가이드 문서보기](./chapter5.md) )  
+5. Chapter 5 : 3주차   ( [가이드 문서보기](./chapter5.md) )  
 
      - kubernetes 설치 (k3s) 및 설정 , k8s 이해 및 활용
      - kubernetes IDE 인 Lens 설치 및 사용법 실습   
@@ -139,5 +139,23 @@
           - kubernetes 리소스 ( Pod , Service , Deployment 생성 및 삭제)
           - 배포 ( Rolling Update / Rollback )
           - Serivce Expose ( Ingress )  
+
+     <br/>
+
+
+6. Chapter 6 : 3주차   ( [가이드 문서보기](./chapter6.md) ) 
+
+     - GitOps 설명 
+     - ArgoCD 설치 및 설정 
+     - kustomize 설명 및 실습
+     - k8s에 배포 실습 ( Blue/Green , Canary )  
+     - ArgoCD Hands-on [ Hands-On 문서보기 ](./argocd_hands_on.md) 
+
+          - kubectl plugin 설치
+          - Blue/Green 배포
+          - Canary 배포
+          - ArgoCD 계정 추가 및 권한 할당
+          - kustomize 사용법
+          - ArgoCD remote Cluster 에서 배포 하기 
 
      <br/>
