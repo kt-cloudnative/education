@@ -139,6 +139,19 @@
           - kubernetes 리소스 ( Pod , Service , Deployment 생성 및 삭제)
           - 배포 ( Rolling Update / Rollback )
           - Serivce Expose ( Ingress )  
+     
+     <br/>
+
+     - k8s hands-on Middle [ Hands-On 문서보기 ](./k8s_middle_hands_on_2023.md)  
+          - Docker Hub Rate Limit
+          - Helm
+          - Kubernetes의 Node Scheduling
+          - Storage Volume ( PV/PVC , DB 설치 + NFS )
+          - MariaDB NFS 에 설치 ( /w Helm Chart )
+          - Service - Headless, Endpoint, ExternalName
+          - Daemonset , Job , CronJob
+          - configMap , Secret
+          - NFS 라이브러리 설치 ( Native Kubernetes ) 
 
      <br/>
 
