@@ -882,3 +882,17 @@ Jenkins restarting이 되고 다시 로그인을 한다.
 <img src="./assets/jenkins_restarting.png" style="width: 60%; height: auto;"/>
 
 <br/><br/>
+
+도커를 사용하기 위해서는 아래 명령어 추가
+
+```bash
+usermod -aG docker jenkins
+```  
+
+<br/>>
+ 
+이후 Jenkins 서비스를 재시작 합니다.
+
+```bash
+service jenkins restart
+```  
