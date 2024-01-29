@@ -256,24 +256,8 @@ root@newedu:/# docker run -d --name nexus -v nexus:/nexus-data -p 40001:8081 -p 
 
 <br/>
 
-### 이미지 push 하기  
+### 도커 로그인 하기 
 
-<br/>
-
-먼저 도커 Tagging 을 하고 push를 해보면 unauthorized 에러가 발생한다.  
-
-<br/>
-
-
-```bash
-root@newedu:~# docker tag nginx:1.14 211.252.85.148:40010/nginx:1.14
-root@newedu:~# docker push 211.252.85.148:40010/nginx:1.14
-The push refers to repository [211.252.85.148:40010/nginx]
-82ae01d5004e: Preparing
-b8f18c3b860b: Preparing
-5dacd731af1b: Preparing
-unauthorized: access to the requested resource is not authorized
-```  
 <br/>
 
 private docker registry에 로그인을 한다.  
@@ -294,7 +278,18 @@ Login Succeeded
 
 <br/>
 
-이제 다시 push 한다. 
+### 이미지 push 하기  
+
+<br/>
+
+도커 Tagging 을 하고 push를 해본다.
+
+<br/>
+
+```bash
+root@newedu:~# docker tag nginx:1.14 211.252.85.148:40010/nginx:1.14
+```  
+<br/>
 
 ```bash
 root@newedu:~# docker push 211.252.85.148:40010/nginx:1.14
