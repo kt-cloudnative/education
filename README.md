@@ -124,9 +124,18 @@
      - VM 기반으로 Jenkins 설치 및 설정 , GitHub , Docker 계정 생성 , Jenkins Pipeline 생성하여 CI 실습  
      - 샘플 소스 : [ 소스 보기 ](https://github.com/kt-cloudnative/edu1)  
 
+    <br/>
+
+5. Chapter 5 : 3주차  ( [가이드 문서보기](./chapter4.md) )  
+
+     - Private Docker Registry 구성 ([가이드 문서보기](./private_docker_registry.md) ) 
+     - Private Docker Registry 설명 및 구축 하기 ( /w Nexus )
+     - Remote 로 연결하기 ( Insecure Registry 설정 )
+     
+
      <br/>
 
-5. Chapter 5 : 3주차   ( [가이드 문서보기](./chapter5.md) )  
+6. Chapter 6 : 3주차   ( [가이드 문서보기](./chapter5.md) )  
 
      - kubernetes 설치 (k3s) 및 설정 , k8s 이해 및 활용
      - kubernetes IDE 인 Lens 설치 및 사용법 실습   
@@ -156,7 +165,7 @@
      <br/>
 
 
-6. Chapter 6 : 3주차   ( [가이드 문서보기](./chapter6.md) ) 
+7. Chapter 7 : 3주차   ( [가이드 문서보기](./chapter6.md) ) 
 
      - GitOps 설명 
      - ArgoCD 설치 및 설정 
