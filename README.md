@@ -126,9 +126,9 @@
 
     <br/>
 
-5. Chapter 5 : 3주차  ( [가이드 문서보기](./chapter4.md) )  
+5. Chapter 5 : 3주차  ( [가이드 문서보기](./private_docker_registry.md) )  
 
-     - Private Docker Registry 구성 ([가이드 문서보기](./private_docker_registry.md) ) 
+     - Private Docker Registry 구성 
      - Private Docker Registry 설명 및 구축 하기 ( /w Nexus )
      - Remote 로 연결하기 ( Insecure Registry 설정 )
      
