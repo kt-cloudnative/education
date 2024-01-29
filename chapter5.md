@@ -3,6 +3,8 @@
 
 kubernetes 는 light하고 빠른 설치가 가능한 Rancher에서 제공하는 k3s로 진행을 하고 kubernetes 배포 관리자인 helm 에 대한 사용법을 습득한다.
 
+<br/>
+
 1. k3s 설치 및 기능 설명
 
 2. helm 설치 및 helm 으로 prometheus 설치 실습
@@ -1114,6 +1116,13 @@ downward-volume
 ### 과제 1
 
 오픈소스 커맨드 도구인 k9s 를 설치 합니다. 
+
+<br/>
+
+
+### 과제 2
+
+docker-compose 구성한 vue/springboot/mariadb를 Helm 으로 구성해서 배포해 본다.  
 
 <br/>
 
