@@ -316,10 +316,6 @@ b8f18c3b860b: Pushed
 
 <br/>
 
-### 본인의 Nexus private registry를 사용하여 Jenkins Pipeline 구성
-
-<br/>
-
 순서
 - credential을 private docker registry 용으로 신규로 구성 한다.  
 - New Item으로 신규 pipeline을 구성한다. ( copy from 이름 활용 )
