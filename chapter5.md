@@ -15,6 +15,10 @@ kubernetes 는 light하고 빠른 설치가 가능한 Rancher에서 제공하는
 
 5. Kubernetes 의 Downward API   
 
+6. swagger 설정  및 API Server Test
+
+<br/>
+
 참고 : https://subicura.com/k8s/
 
 <br/>
@@ -1110,6 +1114,172 @@ root@jakelee:~# kubectl exec downward-volume  cat /etc/downward/podName
 kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
 downward-volume
 ```  
+
+<br/>
+
+## swagger 설정  및 API Server Test
+
+<br/>
+
+### swagger 설정
+
+<br/>
+
+k3s에서 API를 확인하기 위해서 swagger 설정 을 합니다.    
+
+openapi 사양 ( swagger 구문으로 표현 )  
+
+```bash
+kubectl get --raw /openapi/v2  > k8s-openapi-v2.json
+```  
+
+<br/>
+
+swaggerapi/swagger 이미지를 사용하여 json 으로 다운 받은 swagger 화일을 로드합니다.  
+- 40007 포트는 외부에서 접속 가능한 포트
+
+```bash
+docker run   -v $PWD/k8s-openapi-v2.json:/app/swagger.json   -p 40007:8080   swaggerapi/swagger-ui
+```  
+
+<br/>
+
+웹브라우저에서 <public ip>:<swagger 오픈 포트> 로 접속하면 아래와 같이 swagger로 API라 로드된것을 확인 할 수 있습니다.  
+
+
+<img src="./assets/k3s_swagger.png" style="width: 80%; height: auto;"/>   
+
+<br/>
+
+### API Server Test
+
+<br/>
+
+Kubernetes 는 API Server가 내장 되어 있고 모든 Request는 API Server를 통해야 합니다.  
+
+API Server를 테스트 하기 위해서는 postman 이나 Talend API를 사용하고 API를 호출 하기 위해서는 token 이 필요합니다.  
+
+Kubernetes 1.24부터 ServiceAccounts에 대해 더 이상 Secret을 자동으로 생성하지 않아 secret를 별도로 생성해야 합니다.  
+
+Service Account 와 Secret를 생성합니다.   
+
+권한은 현재 설정 하지 않았습니다.
+
+<br/>
+
+edu_sa.yaml
+```bash
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: edu
+  namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: edu-secret
+  namespace: default
+  annotations:
+    kubernetes.io/service-account.name: edu
+type: kubernetes.io/service-account-token
+```  
+
+<br/>
+
+적용한다.  
+
+```bash
+kubectl apply -f edu_sa.yaml
+```  
+
+<br/>
+
+
+
+secret이 생성되고 token 값을 아래와 같이 확인합니다.  
+
+
+```bash
+root@newedu-k3s:~# kubectl describe secret edu_secret
+Name:         edu-secret
+Namespace:    default
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: edu
+              kubernetes.io/service-account.uid: 8f8ea66e-feac-44eb-a153-aeb5dc0fc0d4
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     570 bytes
+namespace:  7 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6InRNQlJhLUhibElLdHB5aWx3RjVQNlphandxb2ZUUVoxNm5PRS05N1UyWTgifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImVkdS1zZWNyZXQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3Nl----Ut-B50MLeWTzIyQr6APh_DKazWZnfIfaBhYT8yOqjCOVM5b75qg-Cdgamwvcgf-4A4ePj81wnGrsr15yqO4d3-gcQflDye1BAjvy2OvU2CMWIB785rUrqL_BAnoSvOPXYCJWdhOlA
+```  
+
+<br/>
+
+Swagger 에서 API URL 을 확인하고 postman 에 설정을 합니다.     
+
+Token은 위에서 생성된 토큰을 복사해서 붙여 넣기 합니다.
+
+<br/>
+
+- Method : GET  
+- URL : https://211.43.13.1:6443/api/v1/namespaces/default/pods
+  - 6443 포트는 API Server 포트
+  - 해당 API는 default namespace 의 POD를 조회하는 기능  
+- Header   
+  - Content-Type : application/json
+  - Authorization : Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImNDQV9CWHUwV181T3BsTHo0bC1sVnNaV1dnWUxEX0lXelpMV0FuWldXc
+
+<br/>
+
+  <img src="./assets/k3s_api_test_1.png" style="width: 80%; height: auto;"/>   
+
+<br/>
+
+해당 sa는 권한이 없기 때문에 아래와 같은 값이 나온다.  
+
+<img src="./assets/k3s_api_test_2.png" style="width: 80%; height: auto;"/>   
+
+<br/>
+
+아래와 같이 권한을 할당한다.  
+
+edu_cluster_role.yaml
+```bash
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: crb_edu
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+- kind: ServiceAccount
+  name: edu
+  namespace: default
+```  
+
+<br/>
+
+적용한다.  
+
+```bash
+kubectl apply -f edu_cluster_role.yaml
+```  
+<br/>
+
+Postman을 다시 실행한다.  아래와 같이 pod list 가 출력이 된다.  
+
+<img src="./assets/k3s_api_test_3.png" style="width: 80%; height: auto;"/>   
+
+
+<br/>
+
+## 과제
 
 <br/>
 
