@@ -188,7 +188,13 @@
 
      <br/>
 
-11. Chapter 11 : 11주차   ( [가이드 문서보기](./keycloak.md) ) 
+8. Chapter 8 : 4주차   ( [가이드 문서보기](./airflow.md) ) 
+
+9. Chapter 9 : 4주차   ( [가이드 문서보기](./kafka.md) ) 
+
+10. Chapter 10 : 4주차   ( [가이드 문서보기](./redis.md) ) 
+
+11. Chapter 11 : 4주차   ( [가이드 문서보기](./keycloak.md) ) 
 
      - KeyCloak 설치 및 실습 
      - keyCloak 를 이용한 오픈 소스 시스템 연동 ( Jenkins / ArgoCD , Airflow , Kibana 등 )  
