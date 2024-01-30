@@ -1245,6 +1245,31 @@ Token은 위에서 생성된 토큰을 복사해서 붙여 넣기 합니다.
 
 <br/>
 
+postman 이 없는 경우는 아래와 같이 curl 명령어를 사용한다.  
+
+```bash
+  curl -k -X 'GET' \
+  'https://211.43.13.1:6443/api/v1/namespaces/default/pods' \
+  -H 'accept: application/json' \
+  -H 'authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImNDQV9CWHUwV181T3BsTHo0bC1sVnNaV1dnWUxEX0lXelpMV0FuWldXcmcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImVkdS1zZWNyZXQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZWR1Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOGU2OTBhZDMtZDc3Yi00ZjExLTlhNTUtZmZiZDU4ZWRlZTk3Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6ZWR1In0.B8zJgLXnhqfeGtcwCTtDD8-ae8Rln62AI5fhUaO3eIrxJ9C74781sWGgnp4l-iixbfM3wjjEouaefH9cFyxcqqnZQ313dwbnnPB0bRQXRbNC8W-IFKnrZD6J-2Q5zoFSQoBioYUpOaIcGLvgwrR4ysOKJaE4QYWUsFjXvhDEWAFNrnmGh7oUCRaMkdywqZsxYYMKx225My37TxVOPy7LLptdfuhE7IYohsRHlCUel6BPMtWXqFbsaRKdqgWhfLAYQx8xwJr7oCGlgm3na9N0K2lL-tXrGXf7erLKJUZmxlv08eEUs2MOzPYYXwBMvqZMU8Ph6ua-E84yK3tZLTV'
+```  
+
+<br/>
+
+```bash
+{
+  "kind": "Status",
+  "apiVersion": "v1",
+  "metadata": {},
+  "status": "Failure",
+  "message": "Unauthorized",
+  "reason": "Unauthorized",
+  "code": 401
+}
+```  
+
+<br/>
+
 아래와 같이 권한을 할당한다.  
 
 edu_cluster_role.yaml
@@ -1286,13 +1311,6 @@ Postman을 다시 실행한다.  아래와 같이 pod list 가 출력이 된다.
 ### 과제 1
 
 오픈소스 커맨드 도구인 k9s 를 설치 합니다. 
-
-<br/>
-
-
-### 과제 2
-
-docker-compose 구성한 vue/springboot/mariadb를 Helm 으로 구성해서 배포해 본다.  
 
 <br/>
 

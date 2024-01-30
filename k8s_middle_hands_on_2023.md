@@ -2438,9 +2438,6 @@ root@newedu:~/# kubectl get secrets/harbor-ci --template={{.data.harbor_id}} | b
 edu
 ```  
 
-<br/>
-
-***
 
 <br/>
 
@@ -2475,4 +2472,10 @@ apt-get install -y nfs-common
 ```
 <br/>
 
+## 과제  
 
+<br/>
+
+### 과제 1
+
+docker-compose 구성한 vue/springboot/mariadb를 Helm 으로 구성해서 배포해 본다.  
