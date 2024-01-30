@@ -132,8 +132,11 @@
      - Private Docker Registry 설명 및 구축 하기 ( /w Nexus )
      - Remote 로 연결하기 ( Insecure Registry 설정 )
      
-
      <br/>
+     
+     참고 : kt cloud 디스크 증설 및 DataDog 연동  ( [가이드 문서보기](./kt_cloud_datadog.md) )  
+
+<br/>
 
 6. Chapter 6 : 3주차   ( [가이드 문서보기](./chapter5.md) )  
 
