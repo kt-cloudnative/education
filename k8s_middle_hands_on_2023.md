@@ -2472,6 +2472,34 @@ apt-get install -y nfs-common
 ```
 <br/>
 
+kt cloud 에서 아래와 같이 NAS를 생성한다.  
+
+<img src="./assets/kt_cloud_nas_g1.png" style="width: 80%; height: auto;"/>  
+
+
+노드에서 연결 방법  
+-  Mount Path : 172.27.128.1:/edunas01
+
+```bash
+mount -t nfs 172.27.128.1:/edunas01 /mnt
+``` 
+
+<br/>
+
+```bash
+root@newedu-k3s:/# cd /mnt
+root@newedu-k3s:/mnt# ls
+default-nfs-pvc-test-pvc-7854e3c3-5eaf-4850-8945-944c2a5353d6
+root@newedu-k3s:/mnt# ls -al
+total 16
+drwxr-xr-x  3 root root 4096 Jan 31 02:15 .
+drwxr-xr-x 24 root root 4096 Jul 11  2022 ..
+drwxrwxrwx  2 root root 4096 Jan 31 00:51 .snapshot
+drwxrwxrwx  2 root root 4096 Jan 31 02:15 default-nfs-pvc-test-pvc-7854e3c3-5eaf-4850-8945-944c2a5353d6
+```  
+
+<br/>
+
 ## 과제  
 
 <br/>

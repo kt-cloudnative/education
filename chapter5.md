@@ -1144,7 +1144,7 @@ docker run   -v $PWD/k8s-openapi-v2.json:/app/swagger.json   -p 40007:8080   swa
 
 <br/>
 
-웹브라우저에서 <public ip>:<swagger 오픈 포트> 로 접속하면 아래와 같이 swagger로 API라 로드된것을 확인 할 수 있습니다.  
+웹브라우저에서 < public ip >:< swagger 오픈 포트 > 로 접속하면 아래와 같이 swagger로 API라 로드된것을 확인 할 수 있습니다.  
 
 
 <img src="./assets/k3s_swagger.png" style="width: 80%; height: auto;"/>   
@@ -1194,7 +1194,6 @@ kubectl apply -f edu_sa.yaml
 ```  
 
 <br/>
-
 
 
 secret이 생성되고 token 값을 아래와 같이 확인합니다.  
