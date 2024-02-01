@@ -1173,6 +1173,37 @@ https://github.com/replicatedhq/ship
 - GitOps 리포지토리에 `git push origin HEAD:install/ ${cluster}/${namespace}/${app_name}` 과 같은 Git CLI 명령을 통해 install 브랜치가 생성이 되면 해당 브랜치의 `${app_name}` 인프라를 배포하는 CI/CD 파이프라인이 실행됩니다. 
 - 배포의 형상은 마찬가지로 Argo CD를 통해 GitOps로 관리합니다.
 
+
+<br/>
+
+### ArgoCD 비밀번호 분실했을때 (admin password reset)
+
+<br/>
+
+argocd-secret 에서 admin.password 와 admin.passwordMtime 의 key, value를 모두 지우고 저장한다.  
+
+```bash 
+kubectl edit secret argocd-secret -n argocd
+```  
+<br/>
+
+
+argocd-server 파드 재시작 
+
+```bash 
+kubectl delete pod  argocd-server-xxxx-xxx -n argocd
+```   
+
+<br/>
+
+새로운 비밀번호 얻기  
+
+```bash
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```  
+
+<br/>
+
 ### 과제
 
 <br/>
