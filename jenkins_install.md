@@ -34,7 +34,7 @@ secret를 만들기 위해 yaml 화일을 생성한다.
 
 TODO  
 
-secret은 2개의 필드가 필요하며 아래 helm jenins_values.yaml 화일의 
+secret은 2개의 필드가 필요하며 아래 helm jenkins_values.yaml 화일의 
 2개의 필드 ( 유저와 비밀번호 ) 와 이름이 같아야 한다.  
 
 <br/>
