@@ -188,13 +188,25 @@
 
      <br/>
 
-8. Chapter 8 : 4주차   ( [가이드 문서보기](./airflow.md) ) 
+8. Chapter 8 : 3주차  ( [가이드 문서보기](./chapter8.md) )
+     
+     - Podman 소개
+     - Jib ( Skaffold ) 소개
+     - React/SpringBoot CI/CD 설명 및 실습
+          - 언어별(React/SpringBoot) Build Tool 생성 
+          - Gitops Repository 구성 
+          - 언어별 (React/SpringBoot) CI Pipeline 구성 및 빌드 (/W CORS) 
+          - ArgoCD 배포
+     - React/SpringBoot/MariaDB 3-tier 구조 한번에 배포 하기
+          - ArgoCD Apps-of-Apps 패턴 
 
-9. Chapter 9 : 4주차   ( [가이드 문서보기](./kafka.md) ) 
+9. Chapter 9 : 4주차   ( [가이드 문서보기](./airflow.md) ) 
 
-10. Chapter 10 : 4주차   ( [가이드 문서보기](./redis.md) ) 
+10. Chapter 10 : 4주차   ( [가이드 문서보기](./kafka.md) ) 
 
-11. Chapter 11 : 4주차   ( [가이드 문서보기](./keycloak.md) ) 
+11. Chapter 11 : 4주차   ( [가이드 문서보기](./redis.md) ) 
+
+12. Chapter 12 : 4주차   ( [가이드 문서보기](./keycloak.md) ) 
 
      - KeyCloak 설치 및 실습 
      - keyCloak 를 이용한 오픈 소스 시스템 연동 ( Jenkins / ArgoCD , Airflow , Kibana 등 )  
