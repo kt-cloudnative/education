@@ -15,7 +15,10 @@ OKD 설명 참고 :  https://velog.io/@_gyullbb/OKD-%EA%B0%9C%EC%9A%94
    - ArgoCD : https://argocd.apps.okd4.ktdemo.duckdns.org/   
    - Harbor Private Docker Registry : https://myharbor.apps.okd4.ktdemo.duckdns.org/    
    - Grafana : https://grafana-route-openshift-user-workload-monitoring.apps.okd4.ktdemo.duckdns.org/  
-   
+   - airflow:  https://airflow.apps.okd4.ktdemo.duckdns.org/   
+
+ <br/>
+
 1. 도메인 생성
 
 2. 설치 환경 인프라 구성
@@ -41,6 +44,9 @@ OKD 설명 참고 :  https://velog.io/@_gyullbb/OKD-%EA%B0%9C%EC%9A%94
 12. Compute ( Worker Node ) Join 하기
 
 13. etcd 백업하기 
+
+14. Airflow 설치
+
 
 
 <br/>
@@ -4474,11 +4480,424 @@ nfs 폴더 확인을 해본다.
 
 <br/>
 
-## 14. Kubecost 설치 및 설정
+
+## 14. Airflow 설치
 
 <br/>
 
-## 14.1 Kubecost 설치
+
+bastion 서버에 airflow 폴더를 생성하고 okd에 airflow namespace를 생성한다.    
+
+```bash
+[root@bastion airflow]# oc new-project airflow
+Now using project "airflow" on server "https://api.okd4.ktdemo.duckdns.org:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
+```
+
+<br/>
+
+해당 namespace 에 권한을 부여한다.  
+
+```bash
+[root@bastion airflow]# oc adm policy add-scc-to-user anyuid system:serviceaccount:airflow:default
+clusterrole.rbac.authorization.k8s.io/system:openshift:scc:anyuid added: "default"
+[root@bastion airflow]# oc adm policy add-scc-to-user privileged system:serviceaccount:airflow:default
+clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "default"
+```
+
+<br/>
+
+bitnami repostiory 에서 PostgreSQL 를 설치 한다.    
+
+먼저 PV / PVC 를 생성한다.     
+
+postgre_pv.yaml
+```bash
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgre-edu-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 10Gi
+  nfs:
+    path: /volume3/okd/postgre
+    server: 192.168.1.79
+  persistentVolumeReclaimPolicy: Retain
+```  
+
+
+postgre_pvc.yaml
+```bash
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgre-edu-pvc
+spec:
+  storageClassName: ""
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: postgre-edu-pv
+```  
+
+<br/>
+
+values.yaml 화일을 가져온다.  
+
+```bash
+[root@bastion airflow]# helm show values bitnami/postgresql  > postgre_values.yaml
+WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /root/okd4/auth/kubeconfig
+```  
+
+<br/>
+
+postgre_values.yaml 을 아래와 같이 수정한다.    
+- readReplicas 의 replicaCount는 0 으로 설정한다.
+
+```bash
+     30     auth:
+     31       postgresPassword: ""
+     32       username: "edu"
+     33       password: "New1234!"
+     34       database: "edu"
+     35       existingSecret: ""
+     36       secretKeys:
+     ...
+         723   persistence:
+    724     ## @param primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
+    725     ##
+    726     enabled: true
+    727     ## @param primary.persistence.existingClaim Name of an existing PVC to use
+    728     ##
+    729     existingClaim: "postgre-edu-pvc"
+    730     ## @param primary.persistence.mountPath The path the volume will be mounted at
+    731     ## Note: useful when using custom PostgreSQL images
+    732     ##
+    733     mountPath: /bitnami/postgresql
+    734     ## @param primary.persistence.subPath The subdirectory of the volume to mount to
+    735     ## Useful in dev environments and one PV for multiple services
+    736     ##
+    737     subPath: ""
+    738     ## @param primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+    739     ## If defined, storageClassName: <storageClass>
+    740     ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    741     ## If undefined (the default) or set to null, no storageClassName spec is
+    742     ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    743     ##   GKE, AWS & OpenStack)
+    744     ##
+    745     storageClass: ""
+    746     ## @param primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
+    747     ##
+    748     accessModes:
+    749       - ReadWriteOnce
+    750     ## @param primary.persistence.size PVC Storage Request for PostgreSQL volume
+    751     ##
+    752     size: 10Gi
+    ...
+    784 readReplicas:
+    785   ## @param readReplicas.name Name of the read replicas database (eg secondary, slave, ...)
+    786   ##
+    787   name: read
+    788   ## @param readReplicas.replicaCount Number of PostgreSQL read only replicas
+    789   ##
+    790   replicaCount: 0
+```
+
+<br/>
+
+설치를 진행한다.  
+
+```bash
+[root@bastion airflow]#  helm install my-postgresql bitnami/postgresql -f postgre_values.yaml -n airflow
+WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /root/okd4/auth/kubeconfig
+NAME: my-postgresql
+LAST DEPLOYED: Sun Feb  4 20:45:34 2024
+NAMESPACE: airflow
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: postgresql
+CHART VERSION: 14.0.1
+APP VERSION: 16.1.0
+
+** Please be patient while the chart is being deployed **
+
+PostgreSQL can be accessed via port 5432 on the following DNS names from within your cluster:
+
+    my-postgresql.airflow.svc.cluster.local - Read/Write connection
+
+To get the password for "postgres" run:
+
+    export POSTGRES_ADMIN_PASSWORD=$(kubectl get secret --namespace airflow my-postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
+
+To get the password for "edu" run:
+
+    export POSTGRES_PASSWORD=$(kubectl get secret --namespace airflow my-postgresql -o jsonpath="{.data.password}" | base64 -d)
+
+To connect to your database run the following command:
+
+    kubectl run my-postgresql-client --rm --tty -i --restart='Never' --namespace airflow --image docker.io/bitnami/postgresql:16.1.0-debian-11-r26 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+      --command -- psql --host my-postgresql -U edu -d edu -p 5432
+
+    > NOTE: If you access the container using bash, make sure that you execute "/opt/bitnami/scripts/postgresql/entrypoint.sh /bin/bash" in order to avoid the error "psql: local user with ID 1.00106e+09} does not exist"
+
+To connect to your database from outside the cluster execute the following commands:
+
+    kubectl port-forward --namespace airflow svc/my-postgresql 5432:5432 &
+    PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U edu -d edu -p 5432
+
+WARNING: The configured password will be ignored on new installation in case when previous PostgreSQL release was deleted through the helm command. In that case, old PVC will have an old password, and setting it through helm won't take effect. Deleting persistent volumes (PVs) will solve the issue.
+```  
+
+<br/>
+
+POD 가 제대로 기동되어 있는지 확인한다.  
+
+```bash
+[root@bastion airflow]# kubectl get po -n airflow
+NAME                                    READY   STATUS            RESTARTS   my-postgresql-0                         1/1     Running           0          9m12s
+```  
+
+<br/>  
+
+airflow 용 values.yaml 를 생성합니다.  
+
+```bash
+[root@bastion airflow]# helm show values bitnami/airflow  > values.yaml
+```  
+
+<br/>
+
+
+values.yaml 을 아래와 같이 수정한다.      
+
+- 17 : storageClass 설정 ( redis 용 ) 
+- 62 : 계정을 설정한다.  
+- OKD 인경우 : fsGroup 과 runAsUser는 airflow namespace 의 range 값으로 설정 : 1001060000  ( Native K8S 불필요 )
+- 942 : dag 정보를 활성화 한다.
+- 953 : github 와 sync 할 정보를 설정한다 ( token 발급 필요 )
+- 1473 : postgre 별도 설치 했으므로 false 
+- 1514 : 별도 설치한 postgre 설정
+- 1531 : redis를 설치한다.  
+
+<br/>
+
+```bash
+     10 global:
+     11   imageRegistry: ""
+     12   ## E.g.
+     13   ## imagePullSecrets:
+     14   ##   - myRegistryKeySecretName
+     15   ##
+     16   imagePullSecrets: []
+     17   storageClass: "nfs-client"
+     ...
+     62 auth:
+     63   ## @param auth.username Username to access web UI
+     64   ##
+     65   username: "admin"
+     66   ## @param auth.password Password to access web UI
+     67   ##
+     68   password: "New1234!"
+     69   ## @param auth.fernetKey Fernet key to secure connections
+     70   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
+     71   ## ref: https://bcb.github.io/airflow/fernet-key
+     ...
+    942   dags:
+    943     enabled: true
+    944     ## Name for repositories can be anything unique and must follow same naming conventions as kubernetes.
+    945     ## Kubernetes resources can have names up to 253 characters long. The characters allowed in names are:
+    946     ## digits (0-9), lower case letters (a-z), -, and .
+    947     ## Example:
+    948     ##   - repository: https://github.com/myuser/myrepo
+    949     ##     branch: main
+    950     ##     name: my-dags
+    951     ##     path: /
+    952     ##
+    953     repositories:
+    954       - repository: "https://shclub:ghp_F9Cbw3I@github.com/shclub/my-airflow.git"
+    955         ## Branch from repository to checkout
+    956         ##
+    957         branch: "master"
+    958         ## An unique identifier for repository, must be unique for each repository
+    959         ##
+    960         name: "my-airflow"
+    961         ## Path to a folder in the repository containing the dags
+    962         ##
+    963         path: "dags"
+    ...
+   1472 postgresql:
+   1473   enabled: false
+   1474   auth:
+     ...
+   1514 externalDatabase:
+   1515   host: my-postgresql.airflow.svc #211.252.87.34 #localhost
+   1516   port: 5432
+   1517   user: edu #bn_airflow
+   1518   database: edu #bitnami_airflow
+   1519   password: New1234! #""
+   1520   existingSecret: ""
+   1521   existingSecretPasswordKey: ""
+    ...
+   1531 redis:
+   1532   enabled: true
+   1533   auth:
+   1534     enabled: true
+   1535     ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enabled is true.
+   1536     ## It should always be set using the password value or in the existingSecret to avoid issues
+   1537     ## with Airflow.
+   1538     ## The password value is ignored if existingSecret is set
+   1539     password: ""
+   1540     existingSecret: ""
+   1541   architecture: standalone
+   1542   master:
+   1543     persistence:
+   1544       enabled: true
+   1545       path: /data
+   1546       subPathExpr: ""
+   1547       storageClass: ""
+   1548       accessModes:
+   1549         - ReadWriteOnce
+   1550       size: 2Gi
+   1551       annotations: {}
+   1552       existingClaim: ""
+   1553     podSecurityContext:
+   1554       enabled: true
+   1555       fsGroup: 1001060000
+   1556     containerSecurityContext:
+   1557       enabled: true
+   1558       runAsUser: 1001060000
+```  
+
+<br/>
+
+airflow 설치를 한다.  
+
+
+```bash
+[root@bastion airflow]# helm install my-airflow -f values.yaml bitnami/airflow -n airflow
+WARNING: Kubernetes configuration file is group-readable. This is insecure. Location: /root/okd4/auth/kubeconfig
+NAME: my-airflow
+LAST DEPLOYED: Sun Feb  4 21:03:08 2024
+NAMESPACE: airflow
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: airflow
+CHART VERSION: 16.5.3
+APP VERSION: 2.8.1
+
+** Please be patient while the chart is being deployed **
+
+Airflow can be accessed via port 8080 on the following DNS name from within your cluster:
+
+    my-airflow.airflow.svc.cluster.local
+
+To connect to Airflow from outside the cluster, perform the following steps:
+
+1.  Create a port-forward to the service:
+
+    kubectl port-forward --namespace airflow svc/my-airflow 8080:8080 &
+    echo "Airflow URL: http://127.0.0.1:8080"
+
+2. Open a browser and access Airflow using the obtained URL.
+
+3. Get your Airflow login credentials by running:
+
+    export AIRFLOW_PASSWORD=$(kubectl get secret --namespace "airflow" my-airflow -o jsonpath="{.data.airflow-password}" | base64 -d)
+    echo User:     admin
+    echo Password: $AIRFLOW_PASSWORD
+```  
+
+<br/>
+
+Github 연동을 위해 Network Policy 를 삭제한다.  
+- OKD의 경우 Node 에서 /etc/resolv.conf 에서 nameserver를 추가한다. ( 구굴 : 8.8.8.8)    
+
+<br/>
+
+```bash    
+[root@bastion airflow]# kubectl delete networkpolicy my-airflow-web my-airflow-worker my-airflow-scheduler -n airflow
+networkpolicy.networking.k8s.io "my-airflow-web" deleted
+networkpolicy.networking.k8s.io "my-airflow-worker" deleted
+networkpolicy.networking.k8s.io "my-airflow-scheduler" deleted
+```   
+
+<br/>
+ 
+잘 기동이 되는지 확인한다.  
+
+```bash
+[root@bastion airflow]# kubectl get po -n airflow
+NAME                                    READY   STATUS    RESTARTS   AGE
+my-airflow-redis-master-0               1/1     Running   0          5m7s
+my-airflow-scheduler-6676f6cddd-9t7xk   2/2     Running   0          5m7s
+my-airflow-web-688fd8b869-kkxd5         2/2     Running   0          5m7s
+my-airflow-worker-0                     2/2     Running   0          5m7s
+my-postgresql-0                         1/1     Running   0          13m
+```    
+
+<br/>
+
+OKD 인 경우는 route 를 생성하고 k3s 인 경우 NodePort를 오픈한다.  
+
+airflow_route.yaml
+```bash
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app : airflow
+  name: airflow
+spec:
+  host: airflow.apps.okd4.ktdemo.duckdns.org
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Allow
+    termination: edge
+  to:
+    kind: Service
+    name: my-airflow
+    weight: 100
+  wildcardPolicy: None
+```  
+
+<br/>
+
+web 브라우저에서 접속해 본다.   
+- 계정 : admin/비밀번호
+
+<img src="./assets/airflow_login.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+현재 Github 에 있는 dag 정보가 보인다.
+
+<img src="./assets/airflow_overview.png" style="width: 80%; height: auto;"/>
+
+
+<br/>
+
+## 16. Kubecost 설치 및 설정
+
+<br/>
+
+## 16.1 Kubecost 설치
 
 <br/>
 
@@ -5732,285 +6151,6 @@ okd-3.okd4.ktdemo.duckdns.org   Ready    worker                 9d    v1.25.7+ea
 [root@okd-1 core]# oc get csr
 No resources found
 ```
-
-
-
-[root@okd-1 core]# cd /var/lib/kubelet/pki
-[root@okd-1 pki]# ls
-kubelet-client-2023-09-01-03-16-13.pem  kubelet-client-current.pem              kubelet-server-2023-09-17-08-10-36.pem  kubelet.crt
-kubelet-client-2023-09-16-22-57-51.pem  kubelet-server-2023-09-01-03-16-34.pem  kubelet-server-current.pem              kubelet.key
-[root@okd-1 pki]# mv * /home/core
-
-
-[root@okd-1 pki]# openssl  x509 -in kubelet-client.pem -text
-Certificate:
-    Data:
-        Version: 3 (0x2)
-        Serial Number:
-            da:2f:6e:89:7b:8f:6b:56:e5:b9:40:0c:a5:61:d1:4d
-        Signature Algorithm: sha256WithRSAEncryption
-        Issuer: OU = openshift, CN = kubelet-signer
-        Validity
-            Not Before: Sep  1 03:11:13 2023 GMT
-            Not After : Sep  2 00:36:57 2023 GMT
-        Subject: O = system:nodes, CN = system:node:okd-1.okd4.ktdemo.duckdns.org
-        Subject Public Key Info:
-            Public Key Algorithm: id-ecPublicKey
-                Public-Key: (256 bit)
-                pub:
-                    04:eb:ab:91:53:ab:50:73:4d:75:ce:f0:c6:19:a6:
-                    12:50:74:e4:6a:b8:d5:0d:62:5f:00:44:6e:14:91:
-                    19:db:97:a5:95:6e:fa:17:1b:0d:4a:13:23:a6:fb:
-                    24:d6:e8:fd:c0:e0:e1:f2:e9:94:9c:33:6f:8f:f5:
-                    f7:57:42:17:77
-                ASN1 OID: prime256v1
-                NIST CURVE: P-256
-        X509v3 extensions:
-            X509v3 Key Usage: critical
-                Digital Signature, Key Encipherment
-            X509v3 Extended Key Usage:
-                TLS Web Client Authentication
-            X509v3 Basic Constraints: critical
-                CA:FALSE
-            X509v3 Authority Key Identifier:
-                4A:13:BB:F5:96:36:01:5C:BA:FE:26:06:96:81:EA:F5:4B:67:D2:95
-    Signature Algorithm: sha256WithRSAEncryption
-    Signature Value:
-        20:7b:f7:92:5b:b8:06:fb:99:18:53:bb:02:39:12:99:dd:9f:
-        82:a5:f3:a0:18:65:9c:eb:1c:3d:af:bd:81:ec:71:ee:4d:86:
-        e0:4c:dd:38:56:40:d5:2a:c8:b5:ec:a6:bd:09:bf:0f:ef:c1:
-        80:bf:97:a6:e1:0b:3e:40:fa:fc:38:5a:54:4e:45:5d:26:52:
-        2d:2e:4a:f4:6c:3d:c0:7d:83:da:02:d1:f3:89:27:ac:8c:53:
-        55:9d:9f:12:3c:ea:b0:f4:00:12:e2:48:dc:85:e4:04:d5:83:
-        c3:24:65:00:7c:4e:57:93:30:7e:ef:07:ef:e4:83:0d:96:77:
-        b0:b6:bd:22:1c:14:08:36:eb:20:7a:29:0d:52:2b:09:63:12:
-        12:66:0d:c1:66:90:01:9c:44:0a:4f:95:69:27:87:2e:21:50:
-        fd:b5:83:09:37:58:d5:3b:9f:0b:01:00:17:9a:fa:bd:60:a4:
-        66:88:36:d1:cc:ae:e4:5f:4a:8c:ee:8c:66:a8:bc:85:3b:79:
-        8f:98:12:48:14:99:21:15:c8:81:85:3c:fe:49:07:dc:59:9e:
-        76:ee:9d:ff:74:d5:76:99:1b:e4:e0:ef:a0:a9:2b:2f:29:4a:
-        b9:17:c2:ce:79:57:ec:bb:a1:dd:c8:4c:a7:b5:f1:bc:cb:b2:
-        b0:47:31:4e
------BEGIN CERTIFICATE-----
-MIICjjCCAXagAwIBAgIRANovbol7j2tW5blADKVh0U0wDQYJKoZIhvcNAQELBQAw
-LTESMBAGA1UECxMJb3BlbnNoaWZ0MRcwFQYDVQQDEw5rdWJlbGV0LXNpZ25lcjAe
-Fw0yMzA5MDEwMzExMTNaFw0yMzA5MDIwMDM2NTdaMEsxFTATBgNVBAoTDHN5c3Rl
-bTpub2RlczEyMDAGA1UEAxMpc3lzdGVtOm5vZGU6b2tkLTEub2tkNC5rdGRlbW8u
-ZHVja2Rucy5vcmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATrq5FTq1BzTXXO
-8MYZphJQdORquNUNYl8ARG4UkRnbl6WVbvoXGw1KEyOm+yTW6P3A4OHy6ZScM2+P
-9fdXQhd3o1YwVDAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwIw
-DAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRKE7v1ljYBXLr+JgaWger1S2fSlTAN
-BgkqhkiG9w0BAQsFAAOCAQEAIHv3klu4BvuZGFO7AjkSmd2fgqXzoBhlnOscPa+9
-gexx7k2G4EzdOFZA1SrIteymvQm/D+/BgL+XpuELPkD6/DhaVE5FXSZSLS5K9Gw9
-wH2D2gLR84knrIxTVZ2fEjzqsPQAEuJI3IXkBNWDwyRlAHxOV5Mwfu8H7+SDDZZ3
-sLa9IhwUCDbrIHopDVIrCWMSEmYNwWaQAZxECk+VaSeHLiFQ/bWDCTdY1TufCwEA
-F5r6vWCkZog20cyu5F9KjO6MZqi8hTt5j5gSSBSZIRXIgYU8/kkH3Fmedu6d/3TV
-dpkb5ODvoKkrLylKuRfCznlX7Luh3chMp7XxvMuysEcxTg==
------END CERTIFICATE-----
-
-
-[root@okd-1 pki]# openssl  x509 -in kubelet-client.pem -text
-Certificate:
-    Data:
-        Version: 3 (0x2)
-        Serial Number:
-            da:2f:6e:89:7b:8f:6b:56:e5:b9:40:0c:a5:61:d1:4d
-        Signature Algorithm: sha256WithRSAEncryption
-        Issuer: OU = openshift, CN = kubelet-signer
-        Validity
-            Not Before: Sep  1 03:11:13 2023 GMT
-            Not After : Sep  2 00:36:57 2023 GMT
-        Subject: O = system:nodes, CN = system:node:okd-1.okd4.ktdemo.duckdns.org
-        Subject Public Key Info:
-            Public Key Algorithm: id-ecPublicKey
-                Public-Key: (256 bit)
-                pub:
-                    04:eb:ab:91:53:ab:50:73:4d:75:ce:f0:c6:19:a6:
-                    12:50:74:e4:6a:b8:d5:0d:62:5f:00:44:6e:14:91:
-                    19:db:97:a5:95:6e:fa:17:1b:0d:4a:13:23:a6:fb:
-                    24:d6:e8:fd:c0:e0:e1:f2:e9:94:9c:33:6f:8f:f5:
-                    f7:57:42:17:77
-                ASN1 OID: prime256v1
-                NIST CURVE: P-256
-        X509v3 extensions:
-            X509v3 Key Usage: critical
-                Digital Signature, Key Encipherment
-            X509v3 Extended Key Usage:
-                TLS Web Client Authentication
-            X509v3 Basic Constraints: critical
-                CA:FALSE
-            X509v3 Authority Key Identifier:
-                4A:13:BB:F5:96:36:01:5C:BA:FE:26:06:96:81:EA:F5:4B:67:D2:95
-    Signature Algorithm: sha256WithRSAEncryption
-    Signature Value:
-        20:7b:f7:92:5b:b8:06:fb:99:18:53:bb:02:39:12:99:dd:9f:
-        82:a5:f3:a0:18:65:9c:eb:1c:3d:af:bd:81:ec:71:ee:4d:86:
-        e0:4c:dd:38:56:40:d5:2a:c8:b5:ec:a6:bd:09:bf:0f:ef:c1:
-        80:bf:97:a6:e1:0b:3e:40:fa:fc:38:5a:54:4e:45:5d:26:52:
-        2d:2e:4a:f4:6c:3d:c0:7d:83:da:02:d1:f3:89:27:ac:8c:53:
-        55:9d:9f:12:3c:ea:b0:f4:00:12:e2:48:dc:85:e4:04:d5:83:
-        c3:24:65:00:7c:4e:57:93:30:7e:ef:07:ef:e4:83:0d:96:77:
-        b0:b6:bd:22:1c:14:08:36:eb:20:7a:29:0d:52:2b:09:63:12:
-        12:66:0d:c1:66:90:01:9c:44:0a:4f:95:69:27:87:2e:21:50:
-        fd:b5:83:09:37:58:d5:3b:9f:0b:01:00:17:9a:fa:bd:60:a4:
-        66:88:36:d1:cc:ae:e4:5f:4a:8c:ee:8c:66:a8:bc:85:3b:79:
-        8f:98:12:48:14:99:21:15:c8:81:85:3c:fe:49:07:dc:59:9e:
-        76:ee:9d:ff:74:d5:76:99:1b:e4:e0:ef:a0:a9:2b:2f:29:4a:
-        b9:17:c2:ce:79:57:ec:bb:a1:dd:c8:4c:a7:b5:f1:bc:cb:b2:
-        b0:47:31:4e
------BEGIN CERTIFICATE-----
-MIICjjCCAXagAwIBAgIRANovbol7j2tW5blADKVh0U0wDQYJKoZIhvcNAQELBQAw
-LTESMBAGA1UECxMJb3BlbnNoaWZ0MRcwFQYDVQQDEw5rdWJlbGV0LXNpZ25lcjAe
-Fw0yMzA5MDEwMzExMTNaFw0yMzA5MDIwMDM2NTdaMEsxFTATBgNVBAoTDHN5c3Rl
-bTpub2RlczEyMDAGA1UEAxMpc3lzdGVtOm5vZGU6b2tkLTEub2tkNC5rdGRlbW8u
-ZHVja2Rucy5vcmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATrq5FTq1BzTXXO
-8MYZphJQdORquNUNYl8ARG4UkRnbl6WVbvoXGw1KEyOm+yTW6P3A4OHy6ZScM2+P
-9fdXQhd3o1YwVDAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUHAwIw
-DAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRKE7v1ljYBXLr+JgaWger1S2fSlTAN
-BgkqhkiG9w0BAQsFAAOCAQEAIHv3klu4BvuZGFO7AjkSmd2fgqXzoBhlnOscPa+9
-gexx7k2G4EzdOFZA1SrIteymvQm/D+/BgL+XpuELPkD6/DhaVE5FXSZSLS5K9Gw9
-wH2D2gLR84knrIxTVZ2fEjzqsPQAEuJI3IXkBNWDwyRlAHxOV5Mwfu8H7+SDDZZ3
-sLa9IhwUCDbrIHopDVIrCWMSEmYNwWaQAZxECk+VaSeHLiFQ/bWDCTdY1TufCwEA
-F5r6vWCkZog20cyu5F9KjO6MZqi8hTt5j5gSSBSZIRXIgYU8/kkH3Fmedu6d/3TV
-dpkb5ODvoKkrLylKuRfCznlX7Luh3chMp7XxvMuysEcxTg==
------END CERTIFICATE-----
-[root@okd-1 pki]# ls
-kubelet-client.pem  kubelet-server.pem  kubelet.crt  kubelet.key
-[root@okd-1 pki]# openssl  x509 -in kubelet-server.pem -text
-Certificate:
-    Data:
-        Version: 3 (0x2)
-        Serial Number:
-            3e:09:e2:5b:a9:a2:08:bb:cd:81:89:39:53:2a:18:f6
-        Signature Algorithm: sha256WithRSAEncryption
-        Issuer: OU = openshift, CN = kubelet-signer
-        Validity
-            Not Before: Sep  1 03:11:34 2023 GMT
-            Not After : Sep  2 00:36:57 2023 GMT
-        Subject: O = system:nodes, CN = system:node:okd-1.okd4.ktdemo.duckdns.org
-        Subject Public Key Info:
-            Public Key Algorithm: id-ecPublicKey
-                Public-Key: (256 bit)
-                pub:
-                    04:60:0a:eb:a7:80:87:33:55:94:ad:76:af:b7:c3:
-                    67:ba:71:cc:b5:73:20:f3:be:27:b2:b9:3b:2f:b9:
-                    9a:ec:70:88:b7:58:65:ed:1b:16:95:ad:9f:d2:b1:
-                    82:73:11:3c:a2:df:20:79:5d:d6:dd:6d:40:17:3a:
-                    6a:44:c4:0c:a8
-                ASN1 OID: prime256v1
-                NIST CURVE: P-256
-        X509v3 extensions:
-            X509v3 Key Usage: critical
-                Digital Signature, Key Encipherment
-            X509v3 Extended Key Usage:
-                TLS Web Server Authentication
-            X509v3 Basic Constraints: critical
-                CA:FALSE
-            X509v3 Authority Key Identifier:
-                4A:13:BB:F5:96:36:01:5C:BA:FE:26:06:96:81:EA:F5:4B:67:D2:95
-            X509v3 Subject Alternative Name:
-                DNS:okd-1.okd4.ktdemo.duckdns.org, IP Address:192.168.1.146
-    Signature Algorithm: sha256WithRSAEncryption
-    Signature Value:
-        8a:95:28:9f:f7:6a:6a:69:7b:c2:ad:52:db:05:3a:b8:1d:f2:
-        26:4d:a4:ae:79:f5:2a:c6:66:35:ac:f3:e9:48:ac:d8:e9:6a:
-        23:a4:07:9f:be:78:cb:64:7e:45:4a:0f:80:06:e3:df:82:c2:
-        cc:fc:ee:93:01:63:f8:11:0c:28:a5:58:7a:87:ef:c4:3c:33:
-        ea:03:46:df:2d:94:ac:b0:e6:e2:4d:39:a0:07:6c:0c:b8:a8:
-        1b:17:01:69:58:2b:38:59:dd:d0:83:03:21:a9:c6:b3:d1:73:
-        c9:39:91:6f:71:b2:a1:2e:c7:62:3a:d0:d7:76:12:a4:28:1b:
-        a5:6e:55:d8:e4:20:38:6d:05:22:c8:6e:e1:94:6e:7f:b0:b8:
-        ee:53:06:fb:fe:cd:3b:78:a4:fe:8d:8f:db:6f:fa:0c:18:a0:
-        4f:cb:ac:37:fe:eb:8d:dd:f0:97:72:1c:54:ca:ac:91:3a:4b:
-        3e:b0:8c:55:ba:5d:22:5d:43:97:9d:ee:26:e8:7a:be:e7:da:
-        4c:3d:97:36:44:40:eb:3f:ca:0b:08:18:59:d4:05:e4:76:c5:
-        1a:0c:59:00:a8:8d:29:93:68:f1:7d:6d:fb:29:b5:00:32:34:
-        2a:d4:be:3b:dd:63:9a:aa:1e:d4:40:21:d2:d6:c6:c2:7f:20:
-        2a:6d:1e:71
------BEGIN CERTIFICATE-----
-MIICvzCCAaegAwIBAgIQPgniW6miCLvNgYk5UyoY9jANBgkqhkiG9w0BAQsFADAt
-MRIwEAYDVQQLEwlvcGVuc2hpZnQxFzAVBgNVBAMTDmt1YmVsZXQtc2lnbmVyMB4X
-DTIzMDkwMTAzMTEzNFoXDTIzMDkwMjAwMzY1N1owSzEVMBMGA1UEChMMc3lzdGVt
-Om5vZGVzMTIwMAYDVQQDEylzeXN0ZW06bm9kZTpva2QtMS5va2Q0Lmt0ZGVtby5k
-dWNrZG5zLm9yZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABGAK66eAhzNVlK12
-r7fDZ7pxzLVzIPO+J7K5Oy+5muxwiLdYZe0bFpWtn9KxgnMRPKLfIHld1t1tQBc6
-akTEDKijgYcwgYQwDgYDVR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoGCCsGAQUFBwMB
-MAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUShO79ZY2AVy6/iYGloHq9Utn0pUw
-LgYDVR0RBCcwJYIdb2tkLTEub2tkNC5rdGRlbW8uZHVja2Rucy5vcmeHBMCoAZIw
-DQYJKoZIhvcNAQELBQADggEBAIqVKJ/3amppe8KtUtsFOrgd8iZNpK559SrGZjWs
-8+lIrNjpaiOkB5++eMtkfkVKD4AG49+Cwsz87pMBY/gRDCilWHqH78Q8M+oDRt8t
-lKyw5uJNOaAHbAy4qBsXAWlYKzhZ3dCDAyGpxrPRc8k5kW9xsqEux2I60Nd2EqQo
-G6VuVdjkIDhtBSLIbuGUbn+wuO5TBvv+zTt4pP6Nj9tv+gwYoE/LrDf+643d8Jdy
-HFTKrJE6Sz6wjFW6XSJdQ5ed7iboer7n2kw9lzZEQOs/ygsIGFnUBeR2xRoMWQCo
-jSmTaPF9bfsptQAyNCrUvjvdY5qqHtRAIdLWxsJ/ICptHnE=
------END CERTIFICATE-----
-
-
-[root@okd-1 core]# oc get csr
-NAME                                             AGE   SIGNERNAME                                    REQUESTOR                                                                         REQUESTEDDURATION   CONDITION
-csr-4zbk8                                        19s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-5nbgm                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-cck4v                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-dxq7v                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-k8cns                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-lmw6j                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-phl8h                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-qn8pj                                        16d   kubernetes.io/kubelet-serving                 system:node:okd-1.okd4.ktdemo.duckdns.org                                         <none>              Approved,Issued
-csr-r8554                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-system:openshift:openshift-authenticator-d7v5c   16d   kubernetes.io/kube-apiserver-client           system:serviceaccount:openshift-authentication-operator:authentication-operator   <none>              Approved,Issued
-system:openshift:openshift-monitoring-np6r8      16d   kubernetes.io/kube-apiserver-client           system:serviceaccount:openshift-monitoring:cluster-monitoring-operator            <none>              Approved,Issued
-
-
-
-3번노드 재설치
-
-[root@okd-1 core]# oc get csr
-NAME                                             AGE   SIGNERNAME                                    REQUESTOR                                                                         REQUESTEDDURATION   CONDITION
-csr-4zbk8                                        67m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-5nbgm                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-6b8z9                                        11m   kubernetes.io/kubelet-serving                 system:node:okd-1.okd4.ktdemo.duckdns.org                                         <none>              Approved,Issued
-csr-b2hhb                                        63m   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-cck4v                                        17d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-dxq7v                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-dxtxg                                        32s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-csr-k8cns                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-lmw6j                                        16d   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-nr9dz                                        42s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Pending
-
-
-승인하고 나면 
-
-[root@okd-1 core]# oc get csr
-NAME                                             AGE    SIGNERNAME                                    REQUESTOR                                                                         REQUESTEDDURATION   CONDITION
-csr-4zbk8                                        69m    kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-5nbgm                                        16d    kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper         <none>              Approved,Issued
-csr-6b8z9                                        13m    kubernetes.io/kubelet-serving                 system:node:okd-1.okd4.ktdemo.duckdns.org                                         <none>              Approved,Issued
-csr-6f5jq                                        14s    kubernetes.io/kubelet-serving                 system:node:okd-3.okd4.ktdemo.duckdns.org                                         <none>              Pending
-
-
-4번 서버
-
-[root@bastion ~]# oc get csr
-NAME        AGE   SIGNERNAME                                    REQUESTOR                                                                   REQUESTEDDURATION   CONDITION
-csr-fzpbw   8s    kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   <none>              Pending
-csr-sphb7   19s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   <none>              Pending
-
-[root@bastion ~]# oc get csr
-NAME        AGE    SIGNERNAME                                    REQUESTOR                                                                   REQUESTEDDURATION   CONDITION
-csr-fzpbw   108s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   <none>              Approved,Issued
-csr-nn266   4s     kubernetes.io/kubelet-serving                 system:node:okd-4.okd4.ktdemo.duckdns.org                                   <none>              Pending
-csr-sphb7   119s   kubernetes.io/kube-apiserver-client-kubelet   system:serviceaccount:openshift-machine-config-operator:node-bootstrapper   <none>              Approved,Issued
-[root@bastion ~]#  oc adm certificate approve csr-nn266
-certificatesigningrequest.certificates.k8s.io/csr-nn266 approved
-
-
-journalctl -u kubelet 에서 특정 날짜 에러 보기
-
-
-No valid client certificate is found but the server is not responsive. A restart may be necessary to retrieve new initial credentials." lastCertificateAvailabilityTim
-
-https://access.redhat.com/solutions/6748611
-
 
 <br/>
 
