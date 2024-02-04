@@ -4728,7 +4728,7 @@ values.yaml 을 아래와 같이 수정한다.
     951     ##     path: /
     952     ##
     953     repositories:
-    954       - repository: "https://shclub:ghp_F9Cbw3I@github.com/shclub/my-airflow.git"
+    954       - repository: "https://shclub:ghp_F9Cbw3I@github.com/kt-cloudnative/my-airflow.git"
     955         ## Branch from repository to checkout
     956         ##
     957         branch: "master"
