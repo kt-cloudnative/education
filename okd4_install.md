@@ -4686,6 +4686,7 @@ values.yaml 을 아래와 같이 수정한다.
 - 19 : storageClass 설정 ( redis 용 ) 
 - 39 : python 설치 패키지를 설정한다.  
 - 75 : 계정을 설정한다.  
+- 102 : tutorial 설치 
 - OKD 인경우 : fsGroup 과 runAsUser는 airflow namespace 의 range 값으로 설정 : 1001060000  ( Native K8S 불필요 )
 - 447 , 767, 1103 : 3개의 pod에 /bitnami/python/requirements.txt 복사 (web/worker/scheduelr)
 - 1237 : dag 정보를 활성화 한다.
@@ -4731,6 +4732,11 @@ values.yaml 을 아래와 같이 수정한다.
      83   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
      84   ## ref: https://bcb.github.io/airflow/fernet-key
      ...
+     99 executor: CeleryExecutor
+    100 ## @param loadExamples Switch to load some Airflow examples
+    101 ##
+    102 loadExamples: true
+    ...   
     447   extraVolumeMounts: # []
     448   - name : requirements
     449     mountPath: /bitnami/python/requirements.txt
