@@ -4737,7 +4737,7 @@ airflow 용 values.yaml 를 생성합니다.
 
 values.yaml 을 아래와 같이 수정한다.      
 
-- 19 : storageClass 설정 ( redis 용 ) 
+- 20 : storageClass 설정 ( redis 용 ) 
 - 39 : python 설치 패키지를 설정한다.  
 - 75 : 계정을 설정한다.  
 - 102 : tutorial 설치 
@@ -4954,12 +4954,20 @@ my-airflow-scheduler-6676f6cddd-9t7xk   2/2     Running   0          5m7s
 my-airflow-web-688fd8b869-kkxd5         2/2     Running   0          5m7s
 my-airflow-worker-0                     2/2     Running   0          5m7s
 my-postgresql-0                         1/1     Running   0          13m
+[root@bastion airflow]# kubectl get svc -n airflow
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+my-postgresql-hl            ClusterIP   None            <none>        5432/TCP         150m
+my-postgresql               NodePort    10.43.79.26     <none>        5432:30012/TCP   150m
+my-airflow-worker-hl        ClusterIP   None            <none>        8793/TCP         39m
+my-airflow-redis-headless   ClusterIP   None            <none>        6379/TCP         39m
+my-airflow-redis-master     ClusterIP   10.43.178.134   <none>        6379/TCP         39m
+my-airflow                  NodePort    10.43.162.253   <none>        8080:30013/TCP   39m
 ```    
 
 <br/>
 
-OKD 인 경우는 route 를 생성하고 k3s 인 경우 NodePort를 오픈한다.  
-
+OKD 인 경우는 route 를 생성하고 k3s 인 경우 위처럼 NodePort 로 오픈한다. ( web 만 )  
+ 
 airflow_route.yaml
 ```bash
 apiVersion: route.openshift.io/v1
