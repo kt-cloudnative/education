@@ -4681,111 +4681,149 @@ airflow 용 values.yaml 를 생성합니다.
 
 <br/>
 
-
 values.yaml 을 아래와 같이 수정한다.      
 
-- 17 : storageClass 설정 ( redis 용 ) 
-- 62 : 계정을 설정한다.  
+- 19 : storageClass 설정 ( redis 용 ) 
+- 39 : python 설치 패키지를 설정한다.  
+- 75 : 계정을 설정한다.  
 - OKD 인경우 : fsGroup 과 runAsUser는 airflow namespace 의 range 값으로 설정 : 1001060000  ( Native K8S 불필요 )
-- 942 : dag 정보를 활성화 한다.
-- 953 : github 와 sync 할 정보를 설정한다 ( token 발급 필요 )
-- 1473 : postgre 별도 설치 했으므로 false 
-- 1514 : 별도 설치한 postgre 설정
-- 1531 : redis를 설치한다.  
+- 447 , 767, 1103 : 3개의 pod에 /bitnami/python/requirements.txt 복사 (web/worker/scheduelr)
+- 1237 : dag 정보를 활성화 한다.
+- 1249 : github 와 sync 할 정보를 설정한다 ( token 발급 필요 )
+- 1307 : sync interval( 단위 : 초 )
+- 1839 : postgre 별도 설치 했으므로 false 
+- 1859 : 별도 설치한 postgre 설정
+- 1875 : redis를 설치한다.  
 
 <br/>
 
 ```bash
-     10 global:
-     11   imageRegistry: ""
-     12   ## E.g.
-     13   ## imagePullSecrets:
-     14   ##   - myRegistryKeySecretName
-     15   ##
-     16   imagePullSecrets: []
-     17   storageClass: "nfs-client"
+     12 ##
+     13 global:
+     14   imageRegistry: ""
+     15   ## E.g.
+     16   ## imagePullSecrets:
+     17   ##   - myRegistryKeySecretName
+     18   ##
+     19   imagePullSecrets: []
+     20   storageClass: "nfs-client"
      ...
-     62 auth:
-     63   ## @param auth.username Username to access web UI
-     64   ##
-     65   username: "admin"
-     66   ## @param auth.password Password to access web UI
-     67   ##
-     68   password: "New1234!"
-     69   ## @param auth.fernetKey Fernet key to secure connections
-     70   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
-     71   ## ref: https://bcb.github.io/airflow/fernet-key
+     38 #extraDeploy: []
+     39 extraDeploy:
+     40   - apiVersion: v1
+     41     kind: ConfigMap
+     42     metadata:
+     43       name: requirements
+     44     data:
+     45       requirements.txt: |
+     46         kubernetes
+     47         pache-airflow-providers-cncf-kubernetes==7.0.0
      ...
-    942   dags:
-    943     enabled: true
-    944     ## Name for repositories can be anything unique and must follow same naming conventions as kubernetes.
-    945     ## Kubernetes resources can have names up to 253 characters long. The characters allowed in names are:
-    946     ## digits (0-9), lower case letters (a-z), -, and .
-    947     ## Example:
-    948     ##   - repository: https://github.com/myuser/myrepo
-    949     ##     branch: main
-    950     ##     name: my-dags
-    951     ##     path: /
-    952     ##
-    953     repositories:
-    954       - repository: "https://shclub:ghp_F9Cbw3I@github.com/kt-cloudnative/my-airflow.git"
-    955         ## Branch from repository to checkout
-    956         ##
-    957         branch: "master"
-    958         ## An unique identifier for repository, must be unique for each repository
-    959         ##
-    960         name: "my-airflow"
-    961         ## Path to a folder in the repository containing the dags
-    962         ##
-    963         path: "dags"
+     75 auth:
+     76   ## @param auth.username Username to access web UI
+     77   ##
+     78   username: "admin"
+     79   ## @param auth.password Password to access web UI
+     80   ##
+     81   password: "New1234!"
+     82   ## @param auth.fernetKey Fernet key to secure connections
+     83   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
+     84   ## ref: https://bcb.github.io/airflow/fernet-key
+     ...
+    447   extraVolumeMounts: # []
+    448   - name : requirements
+    449     mountPath: /bitnami/python/requirements.txt
+    450     subPath: requirements.txt
+    451 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
+    452 ##
+    453   extraVolumes: #[]
+    454   - name: requirements
+    455     configMap:
+    456       name: requirements 
     ...
-   1472 postgresql:
-   1473   enabled: false
-   1474   auth:
-     ...
-   1514 externalDatabase:
-   1515   host: my-postgresql.airflow.svc #211.252.87.34 #localhost
-   1516   port: 5432
-   1517   user: edu #bn_airflow
-   1518   database: edu #bitnami_airflow
-   1519   password: New1234! #""
-   1520   existingSecret: ""
-   1521   existingSecretPasswordKey: ""
+    767   extraVolumeMounts: # []
+    768   - name : requirements
+    769     mountPath: /bitnami/python/requirements.txt
+    770     subPath: requirements.txt
+    771 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
+    772 ##
+    773   extraVolumes: #[]
+    774   - name: requirements
+    775     configMap:
+    776       name: requirements  
     ...
-   1531 redis:
-   1532   enabled: true
-   1533   auth:
-   1534     enabled: true
-   1535     ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enabled is true.
-   1536     ## It should always be set using the password value or in the existingSecret to avoid issues
-   1537     ## with Airflow.
-   1538     ## The password value is ignored if existingSecret is set
-   1539     password: ""
-   1540     existingSecret: ""
-   1541   architecture: standalone
-   1542   master:
-   1543     persistence:
-   1544       enabled: true
-   1545       path: /data
-   1546       subPathExpr: ""
-   1547       storageClass: ""
-   1548       accessModes:
-   1549         - ReadWriteOnce
-   1550       size: 2Gi
-   1551       annotations: {}
-   1552       existingClaim: ""
-   1553     podSecurityContext:
-   1554       enabled: true
-   1555       fsGroup: 1001060000
-   1556     containerSecurityContext:
-   1557       enabled: true
-   1558       runAsUser: 1001060000
+   1101   ## @param worker.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the Airflow worker pods
+   1102   ##
+   1103   extraVolumeMounts: # []
+   1104   - name : requirements
+   1105     mountPath: /bitnami/python/requirements.txt
+   1106     subPath: requirements.txt
+   1107 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
+   1108 ##
+   1109   extraVolumes: #[]
+   1110   - name: requirements
+   1111     configMap:
+   1112       name: requirements
+    ...
+   1237   dags:
+   1238     enabled: true
+   1239     ## Name for repositories can be anything unique and must follow  same naming conventions as kubernetes.
+   1240     ## Kubernetes resources can have names up to 253 characters long. The characters allowed in names are:
+   1241     ## digits (0-9), lower case letters (a-z), -, and .
+   1242     ## Example:
+   1243     ##   - repository: https://github.com/myuser/myrepo
+   1244     ##     branch: main
+   1245     ##     name: my-dags
+   1246     ##     path: /
+   1247     ##
+   1248     repositories:
+   1249       - repository: "https://shclub:ghp_F9mxe078Jk@github.com/shclub/my-airflow.git"
+   1250         ## Branch from repository to checkout
+   1251         ##
+   1252         branch: "master"
+   1253         ## An unique identifier for repository, must be unique for each repository
+   1254         ##
+   1255         name: "my-airflow"
+   1256         ## Path to a folder in the repository containing the dags
+   1257         ##
+   1258         path: "dags"
+    ...
+   1306   sync:
+   1307     interval: 5
+   1308     command: []
+   1309     args: []
+    ...
+   1839 postgresql:
+   1840   enabled: false
+   1841   auth:
+   1842     enablePostgresUser: true
+   1843     username: bn_airflow  
+    ...
+   1858 externalDatabase:
+   1859   host: 211.252.87.xx #localhost
+   1860   port: 30012 # 5432
+   1861   user: edu #bn_airflow
+   1862   database: edu #bitnami_airflow
+   1863   password: New1234!
+   1864   existingSecret: ""
+   1865   existingSecretPasswordKey: ""
+    ...
+   1875 redis:
+   1876   enabled: true
+   1877   auth:
+   1878     enabled: true
+   1879     ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enable     d is true.
+   1880     ## It should always be set using the password value or in the existingSecret to avoid issues
+   1881     ## with Airflow.
+   1882     ## The password value is ignored if existingSecret is set
+   1883     password: ""
+   1884     existingSecret: ""
+   1885   architecture: standalone
 ```  
 
 <br/>
 
 airflow 설치를 한다.  
-
 
 ```bash
 [root@bastion airflow]# helm install my-airflow -f values.yaml bitnami/airflow -n airflow
@@ -4825,13 +4863,14 @@ To connect to Airflow from outside the cluster, perform the following steps:
 
 <br/>
 
-Github 연동을 위해 Network Policy 를 삭제한다.  
+Github 연동을 위해 NetworkPolicy 를 삭제한다.  
 - OKD의 경우 Node 에서 /etc/resolv.conf 에서 nameserver를 추가한다. ( 구굴 : 8.8.8.8)    
 
 <br/>
 
+
 ```bash    
-[root@bastion airflow]# kubectl delete networkpolicy my-airflow-web my-airflow-worker my-airflow-scheduler -n airflow
+[root@bastion airflow]# kubectl delete --all netpol -n airflow
 networkpolicy.networking.k8s.io "my-airflow-web" deleted
 networkpolicy.networking.k8s.io "my-airflow-worker" deleted
 networkpolicy.networking.k8s.io "my-airflow-scheduler" deleted
