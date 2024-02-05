@@ -4710,12 +4710,20 @@ POD 가 제대로 기동되어 있는지 확인한다.
 
 ```bash
 [root@bastion airflow]# kubectl get po -n airflow
-NAME                                    READY   STATUS            RESTARTS   my-postgresql-0                         1/1     Running           0          9m12s
+NAME                                    READY   STATUS    RESTARTS   AGE
+my-postgresql-0                         1/1     Running   0          134m
 ```  
 
 <br/>  
 
-NodePort로 오픈하여 DB Tool 에서 접속을 확인해 본다.  
+NodePort로 오픈하여 DB Tool 에서 접속을 확인해 본다.    
+
+```bash
+[root@bastion airflow]# kubectl get svc -n airflow
+NAME                        TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+my-postgresql-hl            ClusterIP   None            <none>        5432/TCP         135m
+my-postgresql               NodePort    10.43.79.26     <none>        5432:30012/TCP   135m
+```  
 
 <br/>
 
