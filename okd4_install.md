@@ -4536,6 +4536,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
 ```  
 
+<br/>
 
 postgre_pvc.yaml
 ```bash
@@ -4616,7 +4617,7 @@ postgre_values.yaml 을 아래와 같이 수정한다.
      35       existingSecret: ""
      36       secretKeys:
      ...
-         723   persistence:
+    723   persistence:
     724     ## @param primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
     725     ##
     726     enabled: true
@@ -4713,6 +4714,10 @@ NAME                                    READY   STATUS            RESTARTS   my-
 ```  
 
 <br/>  
+
+NodePort로 오픈하여 DB Tool 에서 접속을 확인해 본다.  
+
+<br/>
 
 airflow 용 values.yaml 를 생성합니다.  
 
