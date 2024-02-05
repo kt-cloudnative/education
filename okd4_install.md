@@ -4486,7 +4486,8 @@ nfs 폴더 확인을 해본다.
 <br/>
 
 
-bastion 서버에 airflow 폴더를 생성하고 okd에 airflow namespace를 생성한다.    
+bastion 서버에 airflow 폴더를 생성하고 okd에 airflow namespace를 생성한다.   
+- k3s는 create namespace airflow 로 생성  
 
 ```bash
 [root@bastion airflow]# oc new-project airflow
@@ -4503,7 +4504,7 @@ to build a new example application in Ruby. Or use kubectl to deploy a simple Ku
 
 <br/>
 
-해당 namespace 에 권한을 부여한다.  
+해당 namespace 에 권한을 부여한다.  ( k3s 는 skip )
 
 ```bash
 [root@bastion airflow]# oc adm policy add-scc-to-user anyuid system:serviceaccount:airflow:default
@@ -4516,7 +4517,7 @@ clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "de
 
 bitnami repostiory 에서 PostgreSQL 를 설치 한다.    
 
-먼저 PV / PVC 를 생성한다.     
+- 먼저 PV / PVC 를 생성한다.  ( OKD )    
 
 postgre_pv.yaml
 ```bash
@@ -4551,6 +4552,46 @@ spec:
       storage: 10Gi
   volumeName: postgre-edu-pv
 ```  
+
+<br/>
+
+k3s 인 경우  참고 ( NAS 폴더 생성 필요. 권한과 함께 )
+
+postgre_pv.yaml
+```bash
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgre-edu-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 10Gi
+  nfs:
+    path: /edunas01/jake_postgre
+    server: 172.27.128.1
+  persistentVolumeReclaimPolicy: Retain
+```  
+
+<br/>
+
+postgre_pvc.yaml
+```bash
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgre-edu-pvc
+spec:
+  storageClassName: ""
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: postgre-edu-pv
+```  
+
 
 <br/>
 
