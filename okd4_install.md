@@ -4717,7 +4717,7 @@ values.yaml 을 아래와 같이 수정한다.
      44     data:
      45       requirements.txt: |
      46         kubernetes
-     47         apache-airflow-providers-cncf-kubernetes==7.0.0
+     47         apache-airflow-providers-cncf-kubernetes
      ...
      75 auth:
      76   ## @param auth.username Username to access web UI
