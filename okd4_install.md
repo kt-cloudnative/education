@@ -4691,6 +4691,7 @@ values.yaml 을 아래와 같이 수정한다.
 - 1237 : dag 정보를 활성화 한다.
 - 1249 : github 와 sync 할 정보를 설정한다 ( token 발급 필요 )
 - 1307 : sync interval( 단위 : 초 )
+- 1776 : Network Policy  설정 
 - 1839 : postgre 별도 설치 했으므로 false 
 - 1859 : 별도 설치한 postgre 설정
 - 1875 : redis를 설치한다.  
@@ -4793,6 +4794,11 @@ values.yaml 을 아래와 같이 수정한다.
    1308     command: []
    1309     args: []
     ...
+   1776   networkPolicy:
+   1777     ## @param metrics.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
+   1778     ##
+   1779     enabled: false
+    ...  
    1839 postgresql:
    1840   enabled: false
    1841   auth:
