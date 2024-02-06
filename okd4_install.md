@@ -4780,11 +4780,15 @@ https://fernetkeygen.com/
 
 <br/>
 
-또한 web server는 flask 로 사용중인데 세션을 유지하기 위한 secret 값이 필요하다.    
+또한 web server는 flask 로 사용중인데 세션을 유지하기 위한 secret 값이 필요하다.      
+- 참고 : https://developnote-blog.tistory.com/176  
+
+flask에서 session ID를 관리하기 위해서 필요합니다.  
+
+난수를 만들어서 secret object로 생성합니다.  
 
 ```bash
-root@newedu-k3s:~# python3 -c 'import secrets; print(secrets.token_hex(16))'
-73673e4f2147d219cdcbfe5296aacca5
+python3 -c 'import secrets; print(secrets.token_hex(16))'
 ```  
 
 <br/>
@@ -4815,7 +4819,7 @@ values.yaml 을 아래와 같이 수정한다.
 - 39 : python 설치 패키지를 설정한다.  
 - 75 : 계정을 설정한다.  
 - 86 ~ 90 : fernet key 와 web server secret를 입력한다.  
-- 102 : tutorial 설치 ( false 이면 안함 )
+- 102 : tutorial 설치 ( true 이면 설치 )
 - OKD 인경우 : fsGroup 과 runAsUser는 airflow namespace 의 range 값으로 설정 : 1001060000  ( Native K8S 불필요 )
 - 447 , 774, 1117 : 3개의 pod에 값 복사  ( web/worker/scheduler )
   - /bitnami/python/requirements.txt 복사.
@@ -4862,11 +4866,11 @@ values.yaml 을 아래와 같이 수정한다.
      82   ## @param auth.fernetKey Fernet key to secure connections
      83   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
      84   ## ref: https://bcb.github.io/airflow/fernet-key
-     86   fernetKey: "yqrES-tziYUCvczwyptiLRTZ1avn6mUcMBgCJSG8IGI="
+     86   fernetKey: "yqrES-tziYUCI="
      87   ## @param auth.secretKey Secret key to run your flask app
      88   ## ref: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#secret-key
      89   ##
-     90   secretKey: "73673e4f2147d219cdcbfe5296aacca5"
+     90   secretKey: "73673e4f21cca5"
      91   ## @param auth.existingSecret Name of an existing secret to use for Airflow credentials
      92   ## `auth.password`, `auth.fernetKey`, and `auth.secretKey` will be ignored and picked up from this secret
      93   ## The secret must contain the keys `airflow-password`, `airflow-fernet-key` and `airflow-secret-key'
@@ -4875,7 +4879,7 @@ values.yaml 을 아래와 같이 수정한다.
      99 executor: CeleryExecutor
     100 ## @param loadExamples Switch to load some Airflow examples
     101 ##
-    102 loadExamples: true
+    102 loadExamples: false
     ...   
     447   extraVolumeMounts: # []
     448   - name : requirements
