@@ -4605,8 +4605,14 @@ WARNING: Kubernetes configuration file is group-readable. This is insecure. Loca
 
 <br/>
 
-postgre_values.yaml 을 아래와 같이 수정한다.    
-- readReplicas 의 replicaCount는 0 으로 설정한다.
+postgre_values.yaml 을 아래와 같이 수정한다.       
+
+- 32 : postgreSQL 계정 생성
+- 729 : postgre PVC 이름 
+- 752 : PVC 사이즈  
+- 784~790 : readReplicas 의 replicaCount는 0 으로 설정한다.
+
+<br/>
 
 ```bash
      30     auth:
@@ -4735,21 +4741,92 @@ airflow 용 values.yaml 를 생성합니다.
 
 <br/>
 
+설치하기에 앞서 3가지를 사전에 설정해야한다.  
+- Fernet key 생성  
+- secret key 생성 ( web server 세션 유지 용도 )
+- secret key 생성 ( kube_config 용도 )  
+
+<br/>
+
+### Fernet key 생성  
+
+<br/>
+
+airflow 최신버전은 meta DB 에 password 정보를 평문으로 입력하면 에러가 발생한다.     
+보안을 위해 Fernet 방식(Symmetric key)을 지원한다.
+
+<br/>
+
+fernet key 생성 방법은  python 으로 직접 생성하는 방법과 온라인 서비스에서 하는 방법이 있다.  (https://yahwang.github.io/posts/86)     
+
+- python
+```bash
+pip install 'apache-airflow[crypto]'
+
+from cryptography.fernet import Fernet
+fernet_key= Fernet.generate_key()
+print(fernet_key.decode())
+```  
+<br/>
+
+- 온라인 서비스   
+```bash  
+https://fernetkeygen.com/
+```
+
+<br/>
+
+### secret key 생성 ( web server 세션 유지 용도 ) 
+
+<br/>
+
+또한 web server는 flask 로 사용중인데 세션을 유지하기 위한 secret 값이 필요하다.    
+
+```bash
+root@newedu-k3s:~# python3 -c 'import secrets; print(secrets.token_hex(16))'
+73673e4f2147d219cdcbfe5296aacca5
+```  
+
+<br/>
+
+### secret key 생성 ( kube_config 용도 )  
+
+<br/>
+
+VM의 `/root/.kube` 폴더 아래에  원하는 이름으로 kube config 화일을 만든다.  
+- 이름 : `config_<이름>`  
+- 해당 화일에는 외부에서 접속 가능한 context 내용을 입력한다. ( k3s.yaml 수정 필요 )  
+
+<br/>
+
+`airflow-kube-config` configmap을 생성한다.  
+
+```bash
+root@newedu-k3s:~/airflow# kubectl create configmap  airflow-kube-config  --from-file=/root/.kube/config_yujeong -n airflow
+configmap/airflow-kube-config created
+```  
+
+<br/>
+
+
 values.yaml 을 아래와 같이 수정한다.      
 
 - 20 : storageClass 설정 ( redis 용 ) 
 - 39 : python 설치 패키지를 설정한다.  
 - 75 : 계정을 설정한다.  
-- 102 : tutorial 설치 
+- 86 ~ 90 : fernet key 와 web server secret를 입력한다.  
+- 102 : tutorial 설치 ( false 이면 안함 )
 - OKD 인경우 : fsGroup 과 runAsUser는 airflow namespace 의 range 값으로 설정 : 1001060000  ( Native K8S 불필요 )
-- 447 , 767, 1103 : 3개의 pod에 /bitnami/python/requirements.txt 복사 (web/worker/scheduelr)
-- 1237 : dag 정보를 활성화 한다.
-- 1249 : github 와 sync 할 정보를 설정한다 ( token 발급 필요 )
-- 1307 : sync interval( 단위 : 초 )
-- 1776 : Network Policy  설정 
-- 1839 : postgre 별도 설치 했으므로 false 
-- 1859 : 별도 설치한 postgre 설정
-- 1875 : redis를 설치한다.  
+- 447 , 774, 1117 : 3개의 pod에 값 복사  ( web/worker/scheduler )
+  - /bitnami/python/requirements.txt 복사.
+  - /bitnami/airflow/kube-config 에 kube config 용 config 복사
+- 1257 : dag 정보를 활성화 한다.
+- 1269 : github 와 sync 할 정보를 설정한다 ( token 발급 필요 )
+- 1326 : sync interval( 단위 : 초 )
+- 1797 : Network Policy  설정 
+- 1859 : postgre 별도 설치 했으므로 false 
+- 1878 : 별도 설치한 postgre 설정
+- 1895 : redis를 설치한다.  
 
 <br/>
 
@@ -4785,6 +4862,15 @@ values.yaml 을 아래와 같이 수정한다.
      82   ## @param auth.fernetKey Fernet key to secure connections
      83   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
      84   ## ref: https://bcb.github.io/airflow/fernet-key
+     86   fernetKey: "yqrES-tziYUCvczwyptiLRTZ1avn6mUcMBgCJSG8IGI="
+     87   ## @param auth.secretKey Secret key to run your flask app
+     88   ## ref: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#secret-key
+     89   ##
+     90   secretKey: "73673e4f2147d219cdcbfe5296aacca5"
+     91   ## @param auth.existingSecret Name of an existing secret to use for Airflow credentials
+     92   ## `auth.password`, `auth.fernetKey`, and `auth.secretKey` will be ignored and picked up from this secret
+     93   ## The secret must contain the keys `airflow-password`, `airflow-fernet-key` and `airflow-secret-key'
+     94   ## The value is evaluated as a template
      ...
      99 executor: CeleryExecutor
     100 ## @param loadExamples Switch to load some Airflow examples
@@ -4795,96 +4881,115 @@ values.yaml 을 아래와 같이 수정한다.
     448   - name : requirements
     449     mountPath: /bitnami/python/requirements.txt
     450     subPath: requirements.txt
-    451 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
-    452 ##
-    453   extraVolumes: #[]
-    454   - name: requirements
-    455     configMap:
-    456       name: requirements 
+    451   - name: airflow-kube-config
+    452     mountPath: /bitnami/airflow/kube-config
+    453     #    subPath: kube_config
+    454 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
+    455 ##
+    456   extraVolumes: #[]
+    457   - name: requirements
+    458     configMap:
+    459       name: requirements
+    460   - name: airflow-kube-config
+    461     configMap:
+    462       name: airflow-kube-config
     ...
-    767   extraVolumeMounts: # []
-    768   - name : requirements
-    769     mountPath: /bitnami/python/requirements.txt
-    770     subPath: requirements.txt
-    771 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
-    772 ##
-    773   extraVolumes: #[]
-    774   - name: requirements
-    775     configMap:
-    776       name: requirements  
+    774   extraVolumeMounts: # []
+    775   - name : requirements
+    776     mountPath: /bitnami/python/requirements.txt
+    777     subPath: requirements.txt
+    778   - name: airflow-kube-config
+    779     mountPath: /bitnami/airflow/kube-config
+    780     #    subPath: kube_config
+    781 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
+    782 ##
+    783   extraVolumes: #[]
+    784   - name: requirements
+    785     configMap:
+    786       name: requirements
+    787   - name: airflow-kube-config
+    788     configMap:
+    789       name: airflow-kube-config
     ...
-   1101   ## @param worker.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the Airflow worker pods
-   1102   ##
-   1103   extraVolumeMounts: # []
-   1104   - name : requirements
-   1105     mountPath: /bitnami/python/requirements.txt
-   1106     subPath: requirements.txt
-   1107 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
-   1108 ##
-   1109   extraVolumes: #[]
-   1110   - name: requirements
-   1111     configMap:
-   1112       name: requirements
+   1117   extraVolumeMounts: # []
+   1118   - name : requirements
+   1119     mountPath: /bitnami/python/requirements.txt
+   1120     subPath: requirements.txt
+   1121   - name: airflow-kube-config
+   1122     mountPath: /bitnami/airflow/kube-config
+   1123     #    subPath: kube_config
+   1124 ## @param web.extraVolumes Optionally specify extra list of additional volumes for the Airflow web pods
+   1125 ##
+   1126   extraVolumes: #[]
+   1127   - name: requirements
+   1128     configMap:
+   1129       name: requirements
+   1130   - name: airflow-kube-config
+   1131     configMap:
+   1132       name: airflow-kube-config
     ...
-   1237   dags:
-   1238     enabled: true
-   1239     ## Name for repositories can be anything unique and must follow  same naming conventions as kubernetes.
-   1240     ## Kubernetes resources can have names up to 253 characters long. The characters allowed in names are:
-   1241     ## digits (0-9), lower case letters (a-z), -, and .
-   1242     ## Example:
-   1243     ##   - repository: https://github.com/myuser/myrepo
-   1244     ##     branch: main
-   1245     ##     name: my-dags
-   1246     ##     path: /
-   1247     ##
-   1248     repositories:
-   1249       - repository: "https://shclub:ghp_F9mxe078Jk@github.com/shclub/my-airflow.git"
-   1250         ## Branch from repository to checkout
-   1251         ##
-   1252         branch: "master"
-   1253         ## An unique identifier for repository, must be unique for each repository
-   1254         ##
-   1255         name: "my-airflow"
-   1256         ## Path to a folder in the repository containing the dags
-   1257         ##
-   1258         path: "dags"
+   1257   dags:
+   1258     enabled: true
+   1259     ## Name for repositories can be anything unique and must follow same naming conventions as kubernetes.
+   1260     ## Kubernetes resources can have names up to 253 characters long. The characters allowed in names are:
+   1261     ## digits (0-9), lower case letters (a-z), -, and .
+   1262     ## Example:
+   1263     ##   - repository: https://github.com/myuser/myrepo
+   1264     ##     branch: main
+   1265     ##     name: my-dags
+   1266     ##     path: /
+   1267     ##
+   1268     repositories:
+   1269       - repository: "https://shclub:ghp_F9mxe078Jkquj@github.com/shclub/my-airflow.git"
+   1270         ## Branch from repository to checkout
+   1271         ##
+   1272         branch: "master"
+   1273         ## An unique identifier for repository, must be unique for each repository
+   1274         ##
+   1275         name: "my-airflow"
+   1276         ## Path to a folder in the repository containing the dags
+   1277         ##
+   1278         path: "dags"
     ...
-   1306   sync:
-   1307     interval: 5
-   1308     command: []
-   1309     args: []
+   1326   sync:
+   1327     interval: 5
+   1328     command: []
+   1329     args: []
     ...
-   1776   networkPolicy:
-   1777     ## @param metrics.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
-   1778     ##
-   1779     enabled: false
+   1797   networkPolicy:
+   1798     ## @param metrics.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
+   1799     ##
+   1800     enabled: false
     ...  
-   1839 postgresql:
-   1840   enabled: false
-   1841   auth:
-   1842     enablePostgresUser: true
-   1843     username: bn_airflow  
+   1859 postgresql:
+   1860   enabled: false
+   1861   auth:
+   1862     enablePostgresUser: true
+   1863     username: bn_airflow
+   1864     password: ""
+   1865     database: bitnami_airflow
+   1866     existingSecret: ""
+   1867   architecture: standalone
     ...
-   1858 externalDatabase:
-   1859   host: 211.252.87.xx #localhost
-   1860   port: 30012 # 5432
-   1861   user: edu #bn_airflow
-   1862   database: edu #bitnami_airflow
-   1863   password: New1234!
-   1864   existingSecret: ""
-   1865   existingSecretPasswordKey: ""
+   1878 externalDatabase:
+   1879   host: my-postgresql  #211.252.87.34 #localhost
+   1880   port: 5432 # 30012
+   1881   user: edu #bn_airflow
+   1882   database: edu #bitnami_airflow
+   1883   password: New1234!
+   1884   existingSecret: ""
+   1885   existingSecretPasswordKey: ""
     ...
-   1875 redis:
-   1876   enabled: true
-   1877   auth:
-   1878     enabled: true
-   1879     ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enable     d is true.
-   1880     ## It should always be set using the password value or in the existingSecret to avoid issues
-   1881     ## with Airflow.
-   1882     ## The password value is ignored if existingSecret is set
-   1883     password: ""
-   1884     existingSecret: ""
-   1885   architecture: standalone
+   1895 redis:
+   1896   enabled: true
+   1897   auth:
+   1898     enabled: true
+   1899     ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enabled is true.
+   1900     ## It should always be set using the password value or in the existingSecret to avoid issues
+   1901     ## with Airflow.
+   1902     ## The password value is ignored if existingSecret is set
+   1903     password: ""
+   1904     existingSecret: ""
 ```  
 
 <br/>
@@ -4929,11 +5034,11 @@ To connect to Airflow from outside the cluster, perform the following steps:
 
 <br/>
 
-Github 연동을 위해 NetworkPolicy 를 삭제한다.  
-- OKD의 경우 Node 에서 /etc/resolv.conf 에서 nameserver를 추가한다. ( 구굴 : 8.8.8.8)    
+> OKD의 경우 Node 에서 /etc/resolv.conf 에서 nameserver를 추가한다. ( 구글 : 8.8.8.8)    
 
 <br/>
 
+Github 연동을 위해 NetworkPolicy 를 삭제한다.    
 
 ```bash    
 [root@bastion airflow]# kubectl delete --all netpol -n airflow
@@ -4967,7 +5072,7 @@ my-airflow                  NodePort    10.43.162.253   <none>        8080:30013
 <br/>
 
 OKD 인 경우는 route 를 생성하고 k3s 인 경우 위처럼 NodePort 로 오픈한다. ( web 만 )  
- 
+
 airflow_route.yaml
 ```bash
 apiVersion: route.openshift.io/v1
@@ -5002,6 +5107,111 @@ web 브라우저에서 접속해 본다.
 현재 Github 에 있는 dag 정보가 보인다.
 
 <img src="./assets/airflow_overview.png" style="width: 80%; height: auto;"/>
+
+
+<br/>
+
+dag에 신규로 아래와 같이 k8s_sample.py 을 생성한다.  
+- 참고 : https://github.com/shclub/my-airflow/blob/master/dags/k8s_sample.py  
+
+
+```bash
+import datetime
+
+from airflow import DAG
+from kubernetes.client import models as k8s
+
+import os
+import sys
+
+# 사전에 mount 한 POD의 특정 폴더를 append 한다.  
+sys.path.append('/bitnami/airflow/kube-config') # kube_config
+
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+
+resources = k8s.V1ResourceRequirements(
+    limits={"memory": "1Gi", "cpu": "1"},
+    requests={"memory": "100Mi", "cpu": "0.1"},
+)
+with DAG(
+    "example_kubernetes_python",
+    schedule_interval=None,
+    start_date=datetime.datetime(2020, 2, 2),
+    tags=["example"],
+) as dag:
+
+    run_python = KubernetesPodOperator(
+        task_id="run_python_script",
+        name="run_python_edu",
+        in_cluster=False,  # false로 한다. 
+        cluster_context='k3s-test', # context 를 설정한다. context 가 하나면 설정 안해도 됨
+        config_file='/bitnami/airflow/kube-config/config_yujeong', # kube config 화일을 설정한다.
+        namespace="default", #  namespace를 설정한다.
+        image="python:3.10-slim",  # 이 이미지에 필요한 파이썬 스크립트와 의존성이 포함되어 있어야 합니다.
+        is_delete_operator_pod=False,
+        cmds=["python", "-c"],
+        arguments=[
+            'print("Hello, World!")'
+        ],  # 여기에 파이썬 스크립트를 입력하거나 실행할 파이썬 파일의 경로를 제공하세요.
+        get_logs=True,
+    )
+```  
+
+<br/>
+
+Airflow web 으로 접속을 하고 시간이 지나면 서비스가 올라오고 Active로 설정한다.  
+
+
+<img src="./assets/airflow_k8s_pod_operator1.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+Trigger DAG 버튼을 클릭하면 success 라는 녹색 원 그림이 보인다.  
+
+<img src="./assets/airflow_k8s_pod_operator2.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+녹색 원을 클릭하면 로그를 볼수 있고 마지막 로그를 클릭해 본다.  
+
+<img src="./assets/airflow_k8s_pod_operator3.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+아래 k8s operator를 클릭하고 logs를 선택한다. 
+
+<img src="./assets/airflow_k8s_pod_operator4.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+로그를 확인한다. 에러 없이 잘 실행이 되었다.  
+
+<img src="./assets/airflow_k8s_pod_operator5.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+VM 의 터미널에서 kube config 의 k3s를 선택하고 namespace에 맞게 조회해본다.     
+
+run-python-edu 로 시작하는 POD가 생성 된후 Completed 된 것을 확인 할수 있다.  
+
+```bash
+root@edu5:~# kubectl get po
+NAME                                               READY   STATUS      RESTARTS   AGE
+flask-edu4-app-bc4d7995d-jsb2f                     1/1     Running     0          5d20h
+flask-edu4-app-bc4d7995d-f7r76                     1/1     Running     0          5d20h
+backend-76fdf6d84-w455g                            1/1     Running     0          5d17h
+canary-rollout-5fbf457fdb-fg9bb                    1/1     Running     0          5d1h
+canary-rollout-5fbf457fdb-tjtr8                    1/1     Running     0          5d1h
+canary-rollout-5fbf457fdb-gvdpw                    1/1     Running     0          5d1h
+canary-rollout-5fbf457fdb-cxcfl                    1/1     Running     0          5d1h
+edu-55c5ccfd69-xj4x6                               1/1     Running     0          4d20h
+busybox-nfs-test-7b4d76b495-c4l9g                  1/1     Running     0          4d20h
+nfs-subdir-external-provisioner-86dccff857-s9qnh   1/1     Running     0          4d19h
+my-release-mariadb-0                               1/1     Running     0          4d19h
+frontend-6576496b46-v6vdh                          1/1     Running     0          3d21h
+jenkins-0                                          2/2     Running     0          3d20h
+run-python-edu-wg0kldmj                            0/1     Completed   0          3s
+```  
 
 
 <br/>
