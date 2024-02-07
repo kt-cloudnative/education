@@ -4807,7 +4807,14 @@ VM의 `/root/.kube` 폴더 아래에  원하는 이름으로 kube config 화일�
 
 ```bash
 root@newedu-k3s:~/airflow# kubectl create configmap  airflow-kube-config  --from-file=/root/.kube/config_yujeong -n airflow
-configmap/airflow-kube-config created
+```  
+
+<br/>
+
+OKD 인 경우  아래 참고  
+
+```bash
+[root@bastion airflow]# kubectl create configmap  airflow-kube-config  --from-file=/root/okd4/auth/kubeconfig -n airflow
 ```  
 
 <br/>
@@ -5075,6 +5082,10 @@ my-airflow                  NodePort    10.43.162.253   <none>        8080:30013
 
 <br/>
 
+OKD는  Redis 의 Security Range 수동으로 설정한다.  
+
+<br/>
+
 OKD 인 경우는 route 를 생성하고 k3s 인 경우 위처럼 NodePort 로 오픈한다. ( web 만 )  
 
 airflow_route.yaml
@@ -5224,6 +5235,14 @@ run-python-edu-wg0kldmj                            0/1     Completed   0        
 Airflow Web 에서 Admin -> Connections ->  kubernetes_default 을 선택하고  아래와 같이 설정하면 별로 설정 필요 없이 아래와 같이 사용 가능 하다.  
 
 <img src="./assets/airflow_k8s_pod_operator6.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+OKD 인 경우 는 아래와 같이 설정한다.  
+
+
+<img src="./assets/airflow_k8s_pod_operator7.png" style="width: 80%; height: auto;"/>
+
 
 <br/>
 

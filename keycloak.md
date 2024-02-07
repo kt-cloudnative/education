@@ -65,20 +65,20 @@ keycloak 은 DB로 postgresql를 사용을 합니다.
 
 <br/>
 
-> 이미 DB가 있으면 skip 합니다.  
-
-VM에 로그인 한 후에 keycloak 폴더를 생성한다.  
-
-<br/>
-
-yaml 화일 참고 : https://github.com/shclub/keycloak
-
 <br/>
 
 ```bash
 root@newedu:~# mkdir -p keycloak
 root@newedu:~# cd keycloak
 ``` 
+
+<br/>
+
+> 이미 DB가 있으면 skip 합니다.  
+
+VM에 로그인 한 후에 keycloak 폴더를 생성한다.  
+
+
 
 <br/>
 
@@ -99,19 +99,8 @@ postgresql 은 아래 폴더에 생성되어 있고 수강생은 본인의 폴�
 
 ```bash
 [root@edu postgre]# pwd
-/mnt/postgre
+/mnt/jake_postgre
 [root@edu postgre]# mkdir -p edu
-```
-
-<br/>
-
-keycloak 용 폴더도 생성한다.
-
-```bash
-[root@edu keycloak]# pwd
-/mnt/keycloak
-[root@edu keycloak]# mkdir -p edu
-...
 ```
 
 <br/>
@@ -122,20 +111,18 @@ postgresql / keycloak 용 해당 폴더의 권한을 설정한다.
 
 worker node에서 mount 해서 폴더 권한을 주는 경우는 아래 처럼 설정하고   
 
-`chown -R nfsnobody:nfsnobody edu`  
+`chown -R nfsnobody:nfsnobody jake_postgre`  
 
 pod 내에서 nfs 연결해서 권한을 줄때는  nobody:nogroup 으로 준다.  
 
-`chown -R nobody:nogroup edu`
+`chown -R nobody:nogroup jake_postgre`
 
 <br/>
 
 
 ```bash
-[root@edu postgre]# chown -R nfsnobody:nfsnobody edu
-[root@edu postgre]# chmod 777 edu
-[root@edu keycloak]# chown -R nfsnobody:nfsnobody edu
-[root@edu keycloak]# chmod 777 edu
+[root@edu keycloak]# chown -R nfsnobody:nfsnobody jake_postgre
+[root@edu keycloak]# chmod 777 jake_postgre
 ```  
 
 
@@ -146,7 +133,6 @@ postgresql 용 PV 를 생성한다. 사이즈는 5G로 설정한다.
 <br/>
 
 ```bash  
-root@newedu:~/keycloak#  vi postgre_pv.yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -155,10 +141,10 @@ spec:
   accessModes:
   - ReadWriteMany
   capacity:
-    storage: 5Gi
+    storage: 10Gi
   nfs:
-    path: /share_8c0fade2_649f_4ca5_aeaa_8fd57904f8d5/postgre/edu
-    server: 172.25.1.162
+    path: /edunas01/jake_postgre
+    server: 172.27.128.1
   persistentVolumeReclaimPolicy: Retain
 ```
 
@@ -194,86 +180,43 @@ spec:
 ```
 <br/>
 
-
-keycloak 용 PV 를 생성한다. 사이즈는 5G로 설정한다.
-
-<br/>
-
-```bash  
-root@newedu:~/keycloak#  vi keycloak_pv.yaml
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: keycloak-edu-pv
-spec:
-  accessModes:
-  - ReadWriteMany
-  capacity:
-    storage: 5Gi
-  nfs:
-    path: /share_8c0fade2_649f_4ca5_aeaa_8fd57904f8d5/keycloak/edu
-    server: 172.25.1.162
-  persistentVolumeReclaimPolicy: Retain
-```
-
-<br/>
-
-PV를 생성하고 Status를 확인해보면 Available 로 되어 있는 것을 알 수 있습니다.  
-
-<br/>
+okd에 keycloak namespace를 생성한다.   
+- k3s는 create namespace keycloak 로 생성  
 
 ```bash
-root@newedu:~/keycloak# kubectl apply -f keycloak_pvc.yaml
-```
+[root@bastion keycloak]# oc new-project keycloak
+Now using project "keycloak" on server "https://api.okd4.ktdemo.duckdns.org:6443".
 
-<br/>
+You can add applications to this project with the 'new-app' command. For example, try:
 
-keycloak 용 pvc 를 생성합니다. pvc 이름을 기억합니다.
+    oc new-app rails-postgresql-example
 
-<br/>
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
 
-```bash
-root@newedu:~/keycloak# vi keycloak_pvc.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: keycloak-edu-pvc
-spec:
-  accessModes:
-  - ReadWriteMany
-  resources:
-    requests:
-      storage: 5Gi
-  volumeName: keycloak-edu-pv
-```
-
-<br/>
-
-PVC 를 생성할 때는 namespace ( 본인의 namespace ) 를 명시해야 합니다.  
-
-PVC 생성을 확인 해보고 다시 PV를 확인해 보면 Status가 Bound 로 되어 있는 것을 알 수 있습니다.  이제 PV 와 PVC가 연결이 되었습니다.
-
-<br/>
-
-```bash
-root@newedu:~/keycloak# kubectl apply -f keycloak_pvc.yaml
+    kubectl create deployment hello-node --image=k8s.gcr.io/e2e-test-images/agnhost:2.33 -- /agnhost serve-hostname
 ```
 
 <br/>
 
 default service account 의 권한이 없으면 아래와 같이 권한을 부여 한다.  
+- k3s 는 skip  
 
-<br/>
 
 ```bash
-root@newedu:~/keycloak# oc adm policy add-scc-to-user anyuid -z default -n edu31
-root@newedu:~/keycloak# oc adm policy add-scc-to-user privileged -z default -n edu31
+[root@bastion keycloak]# oc adm policy add-scc-to-user anyuid system:serviceaccount:keycloak:default
+clusterrole.rbac.authorization.k8s.io/system:openshift:scc:anyuid added: "default"
+[root@bastion keycloak]# oc adm policy add-scc-to-user privileged system:serviceaccount:keycloak:default
+clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "default"
 ```
 
 
 <br/>
 
 #### Helm 으로 PostgreSQL 설치
+
+<br/>
+
+> 이미 설치 되어 있으면 SKIP  
 
 <br/>
 
@@ -456,18 +399,56 @@ POD를 조회 해보고  PostgreSQL 해당 POD에 shell 로 들어갑니다.
 root@newedu:~/keycloak# kubectl get po
 NAME                                        READY   STATUS             RESTARTS   AGE
 sonar-postgre-postgresql-0                  1/1     Running            0          2d20h
-sonarqube-5d48b66455-ktn7m                  0/1     CrashLoopBackOff   790        2d19h
 root@newedu:~/keycloak# kubectl exec -it sonar-postgre-postgresql-0  sh
-kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
 ```  
 
 <br/>
 
-postgres 유저로 로그인 합니다.  
+postgres 유저로 로그인 합니다.  초기 비밀번호는 유저와 같다.   
+
+비밀번호가 변경된 경우에는 아래처럼 진행하여 비밀번호를 알아 냅니다. (k3s 인 경우)
+
+```bash
+root@newedu-k3s:~/keycloak# kubectl describe secret my-postgresql -n airflow
+Name:         my-postgresql
+Namespace:    airflow
+Labels:       app.kubernetes.io/instance=my-postgresql
+              app.kubernetes.io/managed-by=Helm
+              app.kubernetes.io/name=postgresql
+              app.kubernetes.io/version=16.1.0
+              helm.sh/chart=postgresql-13.4.4
+Annotations:  meta.helm.sh/release-name: my-postgresql
+              meta.helm.sh/release-namespace: airflow
+
+Type:  Opaque
+
+Data
+====
+password:           8 bytes
+postgres-password:  10 bytes
+```  
+
+<br/>
+
+my-postgresql secret를 edit 하면 base64로 인코딩된  postgres-password를 볼 수 있다.   
+
+```bash
+root@newedu-k3s:~/keycloak# kubectl edit secret my-postgresql -n airflow
+Edit cancelled, no changes made.
+```  
+
+<br/>
+
+위 값을 복사한후 decode 한다.  
+
+```bash
+root@newedu-k3s:~/keycloak# echo ZWRBTzI4UzUzYw== | base64 --decode
+```  
 
 <br/>
 
 ```bash
+[root@bastion airflow]# kubectl exec -it my-postgresql-0 sh -n airflow
 $ psql -U postgres;
 Password for user postgres:
 psql (15.2)
@@ -543,67 +524,92 @@ keycloak helm reppository 에서 helm chart를 검색을 하고 keycloak chart�
 <br/>
 
 ```bash
-root@newedu:~/keycloak# helm search repo keycloak
+[root@bastion keycloak]# helm search repo keycloak
 NAME            	CHART VERSION	APP VERSION	DESCRIPTION
-bitnami/keycloak	13.4.0       	20.0.5     	Keycloak is a high performance Java-based ident...
+bitnami/keycloak	18.3.4       	23.0.6     	Keycloak is a high performance Java-based ident...
 ```
 
 <br/>
 
-bitnami/keycloak 차트에서 차트의 변수 값을 변경하기 위해 keycloak_values.yaml 화일을 추출한다.
+bitnami/keycloak 차트에서 차트의 변수 값을 변경하기 위해 yaml 화일을 추출한다.
 
 <br/>
 
 
 ```bash
-root@newedu:~/keycloak#  helm show values bitnami/keycloak > keycloak_values.yaml
+[root@bastion keycloak]# helm show values bitnami/keycloak > values.yaml
 ```
 
 
 <br/>
 
-vi 데이터에서 생성된 keycloak_values.yaml을 연다.  
+vi 데이터에서 생성된 values.yaml을 연다.  
 
 <br/>
 
 ```bash
-root@newedu:~/keycloak# vi keycloak_values.yaml
+[root@bastion keycloak]# vi values.yaml
 ```  
 
 라인을 보기 위해 ESC 를 누른 후 `:set nu` 를 입력하면 왼쪽에 라인이 보인다.  
 
-
 <br/>
-수정내용
- - 105,108 라인 : admin 계정과 비밀번호
- - 312 라인 : readinessProbe 는 false 로 변경
- - 1003 라인 : postgresql는  별도 설치된 DB 사용으로 false로 변경
- - 1022~1026 : 위에서 설정한 postgresql db 로 설정. host는 서비스 이름
+
+수정내용  
+
+ - 118~124 라인 : admin 계정과 비밀번호
+ - 205 : okd인 경우 edge로 설정 
+ - 354 라인 : readinessProbe 는 false 로 변경
+ - 1079 라인 : postgresql는  별도 설치된 DB 사용으로 false로 변경
+ - 1102~1102 : 위에서 설정한 postgresql db 로 설정. host는 서비스 이름
 
 <br/>
 
 ```bash
- 103   ## @param auth.adminUser Keycloak administrator user
- 104   ##
- 105   adminUser: admin #user
- 106   ## @param auth.adminPassword Keycloak administrator password for the new user
- 107   ##
- 108   adminPassword: "New1234!"
- 109   ## @param auth.existingSecret Existing secret containing Keycloak admin password
+ 118 auth:
+ 119   ## @param auth.adminUser Keycloak administrator user
+ 120   ##
+ 121   adminUser: admin
+ 122   ## @param auth.adminPassword Keycloak administrator password for the new user
+ 123   ##
+ 124   adminPassword: "New1234!"
+ 125   ## @param auth.existingSecret Existing secret containing Keycloak admin password
+ 126   ##
+ 127   existingSecret: ""
+ 128   ## @param auth.passwordSecretKey Key where the Keycloak admin password is being stored inside the existing secret.
+ 129   ##
+ 130   passwordSecretKey: ""
+ 131   ## @param auth.annotations Additional custom annotations for Keycloak auth secret object
+ 132   ##
  ...
- 311 readinessProbe:
- 312   enabled: false
+ 205 proxy:  passthrough # edge : OKD 인경우 
+ ...    
+ 353 readinessProbe:
+ 354   enabled: true # 별도 설정 안함
  ...
- 1002 postgresql:
- 1003   enabled: false # true
+1078 postgresql:
+1079   enabled: false
+1080   auth:
+1081     postgresPassword: ""
+1082     username: bn_keycloak
+1083     password: ""
+1084     database: bitnami_keycloak
+1085     existingSecret: ""
+1086   architecture: standalone
  ...
- 1021 externalDatabase:
- 1022   host: "sonar-postgre-postgresql"
- 1023   port: 5432
- 1024   user: keycloak
- 1025   database: keycloak
- 1026   password: "New1234!"
- 1027   existingSecret: ""
+1102 externalDatabase:
+1103   host: my-postgresql.airflow.svc # 사전에 설치한 airflow postgres 사용  
+1104   port: 5432
+1105   user: keycloak
+1106   database: keycloak
+1107   password: "New1234!"
+1108   existingSecret: ""
+1109   existingSecretHostKey: ""
+1110   existingSecretPortKey: ""
+1111   existingSecretUserKey: ""
+1112   existingSecretDatabaseKey: ""
+1113   existingSecretPasswordKey: ""
+1114   annotations: {}
 ```  
 <br/>
 
@@ -611,86 +617,45 @@ root@newedu:~/keycloak# vi keycloak_values.yaml
 
 <br/>
 
-keycloak_values.yaml 를 사용하여 설치 한다.
+values.yaml 를 사용하여 설치 한다.
 
 <br/>
 
+
 ```bash
-root@newedu:~/keycloak# helm install keycloak bitnami/keycloak -f keycloak_values.yaml -n edu30 --insecure-skip-tls-verify
-NAME: keycloak
-LAST DEPLOYED: Fri Apr  7 11:03:19 2023
-NAMESPACE: edu30
+[root@bastion keycloak]# helm install my-keycloak -f values.yaml bitnami/keycloak -n keycloak --insecure-skip-tls-verify
+NAME: my-keycloak
+LAST DEPLOYED: Tue Feb  6 19:01:47 2024
+NAMESPACE: keycloak
 STATUS: deployed
 REVISION: 1
 TEST SUITE: None
 NOTES:
 CHART NAME: keycloak
-CHART VERSION: 13.4.0
-APP VERSION: 20.0.5
+CHART VERSION: 18.3.4
+APP VERSION: 23.0.6
 
 ** Please be patient while the chart is being deployed **
 
 Keycloak can be accessed through the following DNS name from within your cluster:
 
-    keycloak.edu30.svc.cluster.local (port 80)
+    my-keycloak.keycloak.svc.cluster.local (port 80)
 
 To access Keycloak from outside the cluster execute the following commands:
 
 1. Get the Keycloak URL by running these commands:
 
-  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-        You can watch its status by running 'kubectl get --namespace edu30 svc -w keycloak'
+    export HTTP_SERVICE_PORT=$(kubectl get --namespace keycloak -o jsonpath="{.spec.ports[?(@.name=='http')].port}" services my-keycloak)
+    kubectl port-forward --namespace keycloak svc/my-keycloak ${HTTP_SERVICE_PORT}:${HTTP_SERVICE_PORT} &
 
-    export HTTP_SERVICE_PORT=$(kubectl get --namespace edu30 -o jsonpath="{.spec.ports[?(@.name=='http')].port}" services keycloak)
-    export SERVICE_IP=$(kubectl get svc --namespace edu30 keycloak -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-
-    echo "http://${SERVICE_IP}:${HTTP_SERVICE_PORT}/"
+    echo "http://127.0.0.1:${HTTP_SERVICE_PORT}/"
 
 2. Access Keycloak using the obtained URL.
 3. Access the Administration Console using the following credentials:
 
   echo Username: admin
-  echo Password: $(kubectl get secret --namespace edu30 keycloak -o jsonpath="{.data.admin-password}" | base64 -d)
-```   
-
-<br/>
-
-설치가 완료되면 pod를 조회하여 keycloak-0 pod가 있는지 확인한다.    
-
-없으면 event 를 확인해본다.  
-
-<br/>
-
-```bash
-root@newedu:~/keycloak# kubectl get events
-LAST SEEN   TYPE      REASON         OBJECT                           MESSAGE
-keycloak             create Pod keycloak-0 in StatefulSet keycloak failed error: pods "keycloak-0" is forbidden: unable to validate against any security context constraint: [provider restricted: .spec.securityContext.fsGroup: Invalid value: []int64{1001}: 1001 is not an allowed group spec.containers[0].securityContext.runAsUser: Invalid value: 1001: must be in the ranges: [1001420000, 1001429999]]
-124m        Normal    Pulled         pod/
-```
-
-<br/>
-
-권한 관련 에러가 발생한 것을 볼 수 있고 아래와 같이 keycloak 서비스 어카운트에게  권한을 준다.
-
-<br/>
-
-```bash
-root@newedu:~/keycloak# oc adm policy add-scc-to-user anyuid -z  keycloak 
-clusterrole.rbac.authorization.k8s.io/system:openshift:scc:anyuid added: "keycloak"
-root@newedu:~/keycloak# oc adm policy add-scc-to-user privileged -z keycloak
-clusterrole.rbac.authorization.k8s.io/system:openshift:scc:privileged added: "keycloak"
-``` 
-
-<br/>
-
-keycloak 을 삭제 하고 다시 설치해본다.
-
-```bash
-root@newedu:~/keycloak# helm delete keycloak 
-release "keycloak" uninstalled
-root@newedu:~/keycloak# helm install keycloak bitnami/keycloak -f keycloak_values.yaml --insecure-skip-tls-verify
+  echo Password: $(kubectl get secret --namespace keycloak my-keycloak -o jsonpath="{.data.admin-password}" | base64 -d)
 ```  
-<br/>
 
 pod를 확인해봅니다.
 
@@ -709,23 +674,24 @@ keycloak-0                                  1/1     Running            0        
 
 <br/>
 
-keycloak route 를 아래 처럼 생성한다.  
+keycloak route 를 아래 처럼 생성한다.  ( OKD 인 경우 ) 
 
 ```bash
+[root@bastion keycloak]# cat keycloak_route.yaml
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: keycloak
 spec:
-  host: keycloak-edu30.apps.211-34-231-82.nip.io
+  host: keycloak.apps.okd4.ktdemo.duckdns.org
   port:
     targetPort: http
   tls:
-    insecureEdgeTerminationPolicy: Redirect
+    insecureEdgeTerminationPolicy: Allow
     termination: edge
   to:
     kind: Service
-    name: keycloak
+    name: my-keycloak
     weight: 100
   wildcardPolicy: None
 ```  
@@ -733,19 +699,52 @@ spec:
 <br/>
 
 ```bash
-root@newedu:~/keycloak# kubectl apply -f keycloak_route.yaml
+[root@bastion keycloak]# kubectl apply -f keycloak_route.yaml
 route.route.openshift.io/keycloak created
-root@newedu:~/keycloak# kubectl get route
-NAME       HOST/PORT                                  PATH   SERVICES   PORT   TERMINATION     WILDCARD
-jenkins    jenkins-edu30.apps.211-34-231-82.nip.io           jenkins    http   edge/Redirect   None
-keycloak   keycloak-edu30.apps.211-34-231-82.nip.io          keycloak   http   edge/Redirect   None
+[root@bastion keycloak]# kubectl get route
+NAME       HOST/PORT                               PATH   SERVICES      PORT   TERMINATION     WILDCARD
+keycloak   keycloak.apps.okd4.ktdemo.duckdns.org          my-keycloak   http   edge/Redirect   None
 ```  
 
 <br/>
 
+k3s 인 경우는 ingress를 생성합니다.  
+
+```bash
+root@newedu-k3s:~/keycloak# cat keycloak-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: keycloak.211.252.87.34.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: my-keycloak
+                port:
+                  number: 80
+```  
+
+<br/>
+
+```bash
+root@newedu-k3s:~/keycloak# kubectl get ing -n keycloak
+NAME               CLASS    HOSTS                           ADDRESS       PORTS   AGE
+keycloak-ingress   <none>   keycloak.211.252.87.34.nip.io   172.27.0.41   80      9h
+```  
+
+<br/>
 
 웹 브라우저 에서 본인의 keycloak 으로 접속한다.   
-- 예 : https://keycloak-edu30.apps.211-34-231-82.nip.io
+- OKD : https://keycloak.apps.okd4.ktdemo.duckdns.org/  
+- K3S : http://keycloak.211.252.87.34.nip.io:31860/
 
 
 
@@ -754,6 +753,7 @@ keycloak   keycloak-edu30.apps.211-34-231-82.nip.io          keycloak   http   e
 ### Keycloak 연동 설정
 
 <br/>
+
 keycloak에 접속하면 처음 아래 화면이 나온다.  
 
 <img src="./assets/keycloak2.png" style="width: 80%; height: auto;"/>  
@@ -813,7 +813,7 @@ edu 라는 이름으로 입력하고 create 버튼을 클릭하여 realm 을 생
 
 <br/>
 
-왼편의 "Clients"를 클릭하면 기본 클라이언트들이 있고
+왼쪽 프레임의   "Clients"를 클릭하면 기본 클라이언트들이 있고
 
 우리는 ArgoCD 와 연결하기 위해 Create Client 버튼을 클릭합니다.  
 
@@ -1016,27 +1016,53 @@ ArgoCD configmap을 변경합니다. ( data 항목 아래 )
 
 <br/>
 
+
+OKD 설정
+
+```bash
+[root@bastion keycloak]# kubectl edit configmap argocd-cm -n argocd
+apiVersion: v1
+data:
+  url: https://argocd.apps.okd4.ktdemo.duckdns.org
+  admin.enabled: "true"
+  oidc.config: |
+      name: Keycloak
+      issuer: https://keycloak.apps.okd4.ktdemo.duckdns.org/realms/edu
+      clientID: argocd
+      clientSecret: $oidc.keycloak.clientSecret
+      requestedScopes: ['openid', 'profile', 'email', 'groups']
+      logoutURL: https://keycloak.apps.okd4.ktdemo.duckdns.org/realms/edu/protocol/openid-connect/logout?client_id=argocd&id_token_hint={{token}}&post_logout_redirect_uri={{logoutRedirectURL}}
+```  
+
+<br/>
+
+K3S 설정   
+
 ```bash
 root@newedu:~/keycloak# kubectl edit configmap argocd-cm -n argocd
 apiVersion: v1
 data:
-  url: https://argocd-argocd.apps.211-34-231-82.nip.io
+  url: http://argocd.211.252.87.34.nip.io:31860
   admin.enabled: "true"
   oidc.config: |
       name: Keycloak
-      issuer: https://keycloak-edu30.apps.211-34-231-82.nip.io/realms/edu
+      issuer: http://keycloak.211.252.87.34.nip.io:31860/realms/edu
       clientID: argocd
       clientSecret: $oidc.keycloak.clientSecret
       requestedScopes: ['openid', 'profile', 'email', 'groups']
-      logoutURL:  https://keycloak-edu30.apps.211-34-231-82.nip.io/realms/edu/protocol/openid-connect/logout?client_id=argocd&id_token_hint={{token}}&post_logout_redirect_uri={{logoutRedirectURL}}
+      logoutURL:  http://keycoak.211.252.87.34.nip.io:31860/realms/edu/protocol/openid-connect/logout?client_id=argocd&id_token_hint={{token}}&post_logout_redirect_uri={{logoutRedirectURL}}
 ```  
 
 
 <br/>
 
+> OKD의 경우 https를 사용하기 때문에 인증서를 설정하지 않으면 에러가 발생합니다.  
 
-웹브라우저에서 ArgoCD 에 연결하여 로그인을 합니다.  
-https://keycloak-edu30.apps.211-34-231-82.nip.io  
+<br/>
+
+웹브라우저에서 ArgoCD 에 연결하여 로그인을 합니다.   
+- OKD : https://argocd.apps.okd4.ktdemo.duckdns.org 
+- K3S : http://argocd.211.252.87.34.nip.io:31860/
 
 <br/>
 
