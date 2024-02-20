@@ -1156,7 +1156,7 @@ wildcard-cert.pem  wildcard-fullchain.pem  wildcard-key.pem
 
 
 ```bash
-kubectl create secret tls test-tls --cert /certs/wildcard-cert.pem --key /certs/wildcard-key.pem -n keycloak
+kubectl create secret tls edu-tls --cert /certs/wildcard-cert.pem --key /certs/wildcard-key.pem -n keycloak
 ```  
 
 <br/>
