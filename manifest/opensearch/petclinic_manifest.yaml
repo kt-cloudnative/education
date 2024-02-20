@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-petclinic
+spec:
+  selector:
+    matchLabels:
+      app: spring-petclinic
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: spring-petclinic
+      annotations:
+        #instrumentation.opentelemetry.io/inject-java: 'true'
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/pavolloffay/spring-petclinic:latest
+        resources:
+          limits:
+            cpu: 2
+            memory: "900Mi"
+          requests:
+            cpu: 0.2
+            memory: "100Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-petclinic
+  labels:
+    app: spring-petclinic
+spec:
+  ports:
+  - port: 8080
+    name: http
+    targetPort: 8080
+  selector:
+    app: spring-petclinic
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: spring-petclinic
+spec:
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: spring-petclinic
+    weight: 100
+  wildcardPolicy: None

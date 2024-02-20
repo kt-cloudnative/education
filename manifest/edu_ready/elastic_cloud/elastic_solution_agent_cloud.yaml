@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastic-agent-integrations-deployment
+  labels:
+    app: elastic-agent-integrations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastic-agent-integrations
+  template:
+    metadata:
+      name: elastic-agent-integrations
+      labels:
+        app: elastic-agent-integrations
+    spec:
+      containers:
+      - name: elastic-agent-integrations
+        image: docker.elastic.co/beats/elastic-agent:8.10.4 #elastic/elastic-agent:8.10.4
+        env:
+        - name: FLEET_ENROLL
+          value: "1"
+        - name: FLEET_INSECURE
+          value: "true"
+        - name: FLEET_URL
+          value: "https://0113301ca3e947a0b96a04afa8d5926a.fleet.us-central1.gcp.cloud.es.io:443"
+        - name: FLEET_ENROLLMENT_TOKEN
+          value: OTM3ZGM0c0JzT2tsODhSX1VKaGY6a1RvelNIOEhTa085OG1LUTBnMVY5Zw==
+        - name: KIBANA_HOST
+          value: "http://kibana:5601"
+        - name: KIBANA_FLEET_USERNAME
+          value: "elastic"
+        - name: KIBANA_FLEET_PASSWORD
+          value: "changeme"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - containerPort: 8125
+          protocol: UDP
+      nodeSelector:
+        edu: 'true'
+      serviceAccount: elastic-agent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elastic-agent-integrations
+#  namespace: edu25
+  labels:
+    k8s-app: elastic-agent
+    app: elastic-agent-integrations
+spec:
+  type: ClusterIP
+  selector:
+    app: elastic-agent-integrations
+  ports:
+  - name: udpingest
+    port: 8125
+    protocol: UDP
+    targetPort: 8125
+---

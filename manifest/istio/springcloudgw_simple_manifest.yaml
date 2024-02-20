@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springcloud-simple-gateway
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: scg-simple
+  template:
+    metadata:
+      labels:
+        app: scg-simple
+    spec:
+      containers:
+      - name: scg-simple
+        image: ghcr.io/shclub/edu_springcloud_gw_simple:v1
+        imagePullPolicy: Always
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "dev"
+        ports:
+        - containerPort: 8800
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springcloud-simple-gateway
+  labels:
+    app: scg-simple
+spec:
+  ports:
+  - port: 80
+    targetPort: 8800
+    name: http
+  selector:
+    app: scg-simple
+  type: ClusterIP

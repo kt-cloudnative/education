@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-springboot
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: backend-springboot
+  template:
+    metadata:
+      labels:
+        app: backend-springboot
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/shclub/edu12-4:v7
+        imagePullPolicy: Always
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "dev"
+          - name: JAVA_TOOL_OPTIONS 
+            value: "-javaagent:elastic-apm-agent-1.43.0.jar -Delastic.apm.server_url=http://apm-server.elastic:8200 -Delastic.apm.environment=dev -Dservice_name=backend-springboot -Delastic.apm.secret_token="    ## secret_token 값은 비워둠
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1	
+kind: Service	
+metadata:	
+  name: backend-springboot
+  labels: # service monitor 의 selector 를 위하여 생성
+    app: backend-springboot
+spec:	
+  ports:	
+  - port: 80	
+    targetPort: 8080
+    name: http
+  selector:	
+    app: backend-springboot
+  type: ClusterIP

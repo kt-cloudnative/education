@@ -211,3 +211,16 @@
      - KeyCloak 설치 및 실습 
      - keyCloak 를 이용한 오픈 소스 시스템 연동 ( Jenkins / ArgoCD , Airflow , Kibana 등 )  
      - SpringBoot Backend 연동  
+
+13. Chapter 13 : 5주차   ( [가이드 문서보기](./k8s_security.md) ) 
+
+    - 보안 component
+    - K8S Security Overview  
+    - Route 에 SSL 인증서 설정     
+    - User Account vs Service Account  
+    - Krew 설명 및 설치  
+    - Kubernetes 보안 Components  
+    - Security Context
+    - Pod Security Policy ( PSP )  
+
+

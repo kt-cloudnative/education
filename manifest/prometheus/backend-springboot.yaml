@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-springboot
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: backend-springboot
+  template:
+    metadata:
+      labels:
+        app: backend-springboot
+    spec:
+      containers:
+      - name: backend-springboot
+        image: ghcr.io/shclub/edu12-4:v4 
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "dev"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "edu"
+        - name: SPRING_DATASOURCE_PASSWORD
+          #value: "caravan"
+          value: "edu1234"
+          #value: "jdbc:mariadb://211.34.231.84:32065/edu"
+        #- name: SPRING_DATASOURCE_URL
+          #value: "jdbc:mariadb://helm-db-mariadb.edu31.svc.cluster.local:3306/edu"
+          #value: "jdbc:mariadb://211.34.231.84:32065/edu"
+          #value: "jdbc:mariadb://my-release-mariadb:3306/edu"
+          #value: "jdbc:mariadb://211.34.231.84:32065/edu"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1	
+kind: Service	
+metadata:	
+  name: backend-springboot	
+  labels:
+    app: backend-springboot
+spec:	
+  ports:	
+  - port: 80	
+    targetPort: 8080	
+  selector:	
+    app: backend-springboot
+  type: ClusterIP
+---

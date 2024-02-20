@@ -90,6 +90,12 @@ VM에 로그인 한 후에 keycloak 폴더를 생성한다.
 PostgreSQL 과 keycloak 가 사용하는 stroage를 위해 pv / pvc 를 생성해야 하며
 사전에 NFS 에 접속하여 폴더를 생성한다. 
 
+<br/>
+
+```bash
+root@newedu-k3s:~# mount -t nfs 172.27.128.1:/edunas01  /mnt
+root@newedu-k3s:~# ls /mnt
+```  
 
 <br/>
 
@@ -458,6 +464,9 @@ Type "help" for help.
 
 keycloak 용 DB를 생성하고 아이디/비밀번호를 설정합니다.   
 추가적으로 role을 할당합니다. ( 일단 SUPERSUER로 설정합니다. )
+
+
+
 
 <br/>
 
@@ -1101,6 +1110,60 @@ root@newedu:~# kubectl edit configmap argocd-rbac-cm  -n argocd
 
 이제 logout 을 해봅니다. 
 정상적으로 첫 화면이 나오면 로그 아웃이 된 것입니다. 
+
+<br/>
+
+## 3. SpringBoot Backend 연동
+
+<br/>
+
+
+<img src="./assets/keycloak_jwt_token.png" style="width: 80%; height: auto;"/>  
+
+
+<img src="./assets/keycloak_jwt_token_algo.png" style="width: 80%; height: auto;"/>  
+
+
+<br/>
+
+## 4. Ingress SSH 설정
+
+<br/>
+
+먼저 duckdns 사이트에서 token 값을 받아 옵니다.  
+
+letsencrypt_wildcard.sh 화일을 생성을 하고 권한을 부여 합니다.  
+
+```bash
+root@newedu-k3s:~/security# vi letsencrypt_wildcard.sh
+root@newedu-k3s:~/security# chmod 777 letsencrypt_wildcard.sh
+```  
+
+<br/>
+
+실행을 하면 아래와 같이 /certs 폴더에 3개의 화일이 생성됩니다.  
+
+```bash
+root@newedu-k3s:~/security# ./letsencrypt_wildcard.sh
+ea7d0774b3ab5247744031b066a97f851d51f2a24a426ac3628a0bb2bf2990e7
+root@newedu-k3s:~/keycloak# ls /certs
+wildcard-cert.pem  wildcard-fullchain.pem  wildcard-key.pem
+```
+
+<br/>
+
+여기서 Ingress 에 인증서를 적용하기 위해서는 인증서 (cert.pem) 과 비밀키 (key.pem) 두 개만 필요하고 아래처럼 secret 을 생성합니다.  
+
+
+```bash
+kubectl create secret tls test-tls --cert /certs/wildcard-cert.pem --key /certs/wildcard-key.pem -n keycloak
+```  
+
+<br/>
+
+Ingress 를 생성 합니다. (/w TLS)  
+web 브라우저에서 https로 연동하여 인증서를 확인힙니다.  
+
 
 <br/>
 

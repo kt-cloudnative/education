@@ -1,0 +1,25 @@
+# privileged:true -> 노드 디바이스 목록 조회 가능
+apiVersion: v1
+kind: Pod
+metadata:
+ name: security-privileged-true
+spec:
+ containers:
+ - name: sec-ctx-demo-default
+   image: ghcr.io/shclub/netshoot
+   command: ["tail"]
+   args: ["-f", "/dev/null"]
+   securityContext:
+     privileged: true
+---
+# privileged:false -> 노드 디바이스 목록 조회 불가능
+apiVersion: v1
+kind: Pod
+metadata:
+ name: security-privileged-false
+spec:
+ containers:
+ - name: sec-ctx-demo-default
+   image: ghcr.io/shclub/netshoot
+   command: ["tail"]
+   args: ["-f", "/dev/null"]

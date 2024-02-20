@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: integration-server-deployment
+  labels:
+    app: integration-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: integration-server
+  template:
+    metadata:
+      name: integration-server
+      labels:
+        app: integration-server
+    spec:
+      containers:
+      - name: integration-server
+        image: elastic/elastic-agent:8.9.2
+        env:
+        - name: FLEET_SERVER_ENABLE
+          value: "1"
+        - name: FLEET_SERVER_ELASTICSEARCH_HOST
+          value: https://elasticsearch-master:9200
+        - name: FLEET_SERVER_POLICY_NAME
+          value: fleet-server-policy
+        - name: FLEET_SERVER_SERVICE_TOKEN
+          value: AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL3Rva2VuLTE2OTcxNjY1MDcyNTI6QnFSaG9TZEpReE90U1Z4aWdrYXJFdw
+        - name: FLEET_SERVER_ELASTICSEARCH_INSECURE
+          value: "1"
+        - name: FLEET_SERVER_PORT
+          value: "8220"
+        ports:
+        - containerPort: 8220
+          protocol: TCP
+      nodeSelector:
+        elastic: 'true'
+        edu2: 'true'
+      serviceAccount: elastic-agent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleet-server
+  namespace: elastic
+  labels:
+    k8s-app: elastic-agent
+    app: integration-server
+spec:
+  type: ClusterIP
+  selector:
+    app: integration-server
+  ports:
+  - name: http
+    port: 8220
+    protocol: TCP
+    targetPort: 8220
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apm-server
+  namespace: elastic
+  labels:
+    k8s-app: elastic-agent
+    app: integration-server
+spec:
+  type: ClusterIP
+  selector:
+    app: integration-server
+  ports:
+  - name: http
+    port: 8200
+    protocol: TCP
+    targetPort: 8200

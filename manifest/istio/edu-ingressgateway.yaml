@@ -1,0 +1,20 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: edu-gateway
+spec:
+  profile: empty
+  components:
+    ingressGateways:
+      - name: edu-ingressgateway
+        namespace: edu
+        enabled: true
+        label:
+          istio: edu-ingressgateway
+  hub: docker.io/istio
+  values:
+    global:
+    gateways:
+      istio-ingressgateway:
+        type: ClusterIP

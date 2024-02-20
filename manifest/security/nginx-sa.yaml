@@ -1,0 +1,22 @@
+nginx_sa.yamlapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sa-example
+  labels:
+    app: sa-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sa-example
+  template:
+    metadata:
+      labels:
+        app: sa-example
+    spec:
+      serviceAccountName: edu-sa # SA 를 지정해줍니다
+      containers:
+        - name: nginx
+          image: ghcr.io/shclub/nginx:latest
+          ports:
+            - containerPort: 80

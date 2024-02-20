@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: heartbeat-deployment-config
+  namespace: elastic
+  labels:
+    heartbeat: "true"
+data:
+  heartbeat.yml: |-                                                                     ## configmap으로 관리됨
+    heartbeat.monitors:
+    - id: solutions                                                                     ## monitor의 고유ID 설정
+      type: http                                                                        ## monitor 종류 설정, 솔루션 uptime을 확인하기 위한 것이므로 http 사용
+      hosts: [                                                                          ## 여러 솔루션 URL을 입력하여 한꺼번에 check
+        'https://frontend-react-edu25.apps.okd4.ktdemo.duckdns.org/',
+        'https://frontend-edu25.apps.okd4.ktdemo.duckdns.org/'
+      ]
+      max_redirects: 5                                                                  ## 로그인 화면 등으로 redirect되는 경우가 있어 exception 처리하는 설정
+      check.response.status: [200]                                                      ## status code 값 설정, 일반적으로 200 사용
+      schedule: '@every 5m'                                                             ## check 주기 설정
+    processors:
+      - add_kubernetes_metadata:
+    output.elasticsearch:
+      hosts: ['${ELASTICSEARCH_HOST:elasticsearch-master}:${ELASITCSEARCH_PORT:9200}']  ## 데이터를 수신할 Elasticsearch service host와 port 설정
+      username: ${ELASTICSEARCH_USERNAME}                                               ## Elasticsearch 계정 설정
+      password: ${ELASTICSEARCH_PASSWORD}                                               ## 위 계정의 비밀번호 설정
+      protocol: https
+      ssl.verification_mode: none
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heartbeat
+  namespace: elastic
+  labels:
+    heartbeat: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      heartbeat: "true"
+  template:
+    metadata:
+      labels:
+        heartbeat: "true"
+    spec:
+      serviceAccountName: elastic-agent   ## 별도 serviceaccount 생성 필요없이 elastic-agent serviceaccount 사용하면 됨
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: heartbeat
+        image: elastic/heartbeat:8.9.2
+        imagePullPolicy: "IfNotPresent"
+        args: [
+          "-c", "/etc/heartbeat.yml",
+          "--strict.perms=false",
+          "-e",
+          "-d", "*"
+        ]
+        env:
+        - name: ELASTICSEARCH_HOST
+          value: elasticsearch-master
+        - name: ELASTICSEARCH_PORT
+          value: "9200"
+        - name: ELASTICSEARCH_USERNAME
+          value: "elastic"
+        - name: ELASTICSEARCH_PASSWORD
+          value: "Shcl*****"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        securityContext:
+          runAsUser: 0
+          privileged: true
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/heartbeat.yml
+          readOnly: true
+          subPath: heartbeat.yml
+        - name: data
+          mountPath: /usr/share/heartbeat/data
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: heartbeat-deployment-config
+      - name: data
+        emptyDir: {}
+      nodeSelector:                                                                     ## node selector 설정
+        elastic: 'true'
+        edu: 'true'

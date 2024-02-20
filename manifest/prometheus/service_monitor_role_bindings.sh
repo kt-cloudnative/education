@@ -1,0 +1,1 @@
+kubectl create rolebinding servicemonitor-rolebinding --role=servicemonitor-role --user=edu25

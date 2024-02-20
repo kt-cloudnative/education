@@ -92,7 +92,7 @@ ktdemo.duckdns.org 로 생성 을 한다. ip 를 변경하고 싶으면 ip를 �
 | VM | vmware | 192.168.1.1.150 | okd-4.okd4.ktdemo.duckdns.org |  Worker | Fedora Core OS 37 | 4 core / 40 G / 100G | 워커 노드 추가
 | VM | hyper-v | 192.168.1.1.154 | okd-5.okd4.ktdemo.duckdns.org |  Worker | Fedora Core OS 37 | 4 core / 16 G / 100G | 워커 노드 추가
 | VM | esxi | 192.168.1.1.155 | okd-6.okd4.ktdemo.duckdns.org |  Worker | Fedora Core OS 37 | 4 core / 16 G / 100G | 워커 노드 추가
-| VM | virtualbox | 192.168.1.1.156 | okd-6.okd4.ktdemo.duckdns.org |  Worker | Fedora Core OS 37 | 4 core / 14 G / 100G | 워커 노드 추가
+| VM | virtualbox | 192.168.1.1.156 | okd-7.okd4.ktdemo.duckdns.org |  Worker | Fedora Core OS 37 | 4 core / 14 G / 100G | 워커 노드 추가
 
 <br/>
 

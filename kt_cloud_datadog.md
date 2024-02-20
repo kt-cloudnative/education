@@ -767,5 +767,54 @@ root@jakelee:~# curl http://10.42.0.200:5000
         - docker info | grep "Docker Root Dir"
     - 도커 status 정보
         - systemctl status docker
-    - ExecStart로 시작하는 라인 끝에 --data-root=/data/docker 추가
+    - ExecStart로 시작하는 라인 끝에 --data-root=/data/docker 추가 (불필요)
 
+<br/>
+
+## 순서 
+
+<br/>
+
+1. /data 폴더에 docker 폴더 신규 생성.   
+    ```bash
+    mkdir -p /data/docker
+    ```
+
+2. etc/docker/daemon.json 에 값 입력  
+    ```bash
+    root@newedu-k3s:/data# cat /etc/docker/daemon.json
+    {
+      "data-root":"/data/docker"
+    }
+    ```  
+
+3. /var/lib/docker 폴더 내용 /data/docker로 이동
+
+    ```bash
+    cp -rp /var/lib/docker /data/docker
+    ```  
+
+4. 도커 재기동 
+    ```bash
+    systemctl restart docker
+    ```  
+
+5. root 디렉토리 변경 확인
+    ```bash
+    docker info | grep Root. 
+    ```  
+6. 기존 폴더 삭제
+    ```bash
+    rm -rf /var/lib/docker
+    ```
+
+7. 하드 용량 확보 확인
+    ```bash
+    df -h | grep dev
+    ```  
+
+8. 필요시 k3s 재기동
+    ```bash
+    systemctl daemon-reload
+    systemctl restart k3s
+    ```

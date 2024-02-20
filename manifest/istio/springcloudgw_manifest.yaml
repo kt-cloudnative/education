@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springcloud-gateway
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: scg
+  template:
+    metadata:
+      labels:
+        app: scg
+    spec:
+      containers:
+      - name: scg
+        image: ghcr.io/shclub/gw-edu:v2
+        imagePullPolicy: Always
+        env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "dev"
+#          - name: JAVA_TOOL_OPTIONS
+#            value: "-javaagent:elastic-apm-agent-1.43.0.jar -Delastic.apm.server_url=http://apm-server.elastic:8200 -Delastic.apm.environment=dev -Dservice_name=backend-springboot -Delastic.apm.secret_token="    ## secret_token 값은 비워둠
+        ports:
+        - containerPort: 8800
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springcloud-gateway
+  labels:
+    app: scg
+spec:
+  ports:
+  - port: 80
+    targetPort: 8800
+    name: http
+  selector:
+    app: scg
+  type: ClusterIP

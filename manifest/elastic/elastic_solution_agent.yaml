@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastic-agent-integrations-deployment
+  labels:
+    app: elastic-agent-integrations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastic-agent-integrations
+  template:
+    metadata:
+      name: elastic-agent-integrations
+      labels:
+        app: elastic-agent-integrations
+    spec:
+      containers:
+      - name: elastic-agent-integrations
+        image: elastic/elastic-agent:8.9.2
+        env:
+        - name: FLEET_ENROLL
+          value: "1"
+        - name: FLEET_INSECURE
+          value: "true"
+        - name: FLEET_URL
+          value: "https://fleet-server.elastic.svc:8220"
+        - name: FLEET_ENROLLMENT_TOKEN
+          value: YW9uQ2I0c0JDTlluTUZCZGEtY1g6dHM0M2pyVW9TeHVfSFhtZXpvdldIQQ==
+        - name: KIBANA_HOST
+          value: "https://kibana-kibana.elastic.svc:5601"
+        - name: KIBANA_FLEET_USERNAME
+          value: "elastic"
+        - name: KIBANA_FLEET_PASSWORD
+          value: "Shcl@#2390"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - containerPort: 8125
+          protocol: UDP
+      nodeSelector:
+        elastic: 'true'
+      serviceAccount: elastic-agent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elastic-agent-integrations
+  namespace: elastic
+  labels:
+    k8s-app: elastic-agent
+    app: elastic-agent-integrations
+spec:
+  type: ClusterIP
+  selector:
+    app: elastic-agent-integrations
+  ports:
+  - name: udpingest
+    port: 8125
+    protocol: UDP
+    targetPort: 8125
+---

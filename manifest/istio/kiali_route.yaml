@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app : kiali
+  name: kiali
+spec:
+  host: kiali.apps.okd4.ktdemo.duckdns.org
+  port:
+    targetPort: 2001
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: kiali
+    weight: 100
+  wildcardPolicy: None

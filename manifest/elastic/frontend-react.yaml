@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-react
+  labels:
+    app: frontend-reat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-react
+  template:
+    metadata:
+      labels:
+        app: frontend-react
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/shclub/edu12-3:v5
+        env:
+          - name: BACKEND_API_URL
+            value: "http://backend-springboot"
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-react
+spec:
+  selector:
+    app: frontend-react
+  ports:
+    - protocol: TCP
+      port: 80
+      name: http
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: frontend-react
+spec:
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: frontend-react
+    weight: 100
+  wildcardPolicy: None 

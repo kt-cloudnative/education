@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: true
+    prometheusK8s:
+      retention: 14d
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-client
+          volumeMode: Filesystem
+          resources:
+            requests:
+              storage: 50Gi
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 3
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 3
+      - effect: NoSchedule
+        key: node.kubernetes.io/memory-pressure
+        operator: Exists
+    alertmanagerMain:
+      nodeSelector:
+        devops: "true"
+      volumeClaimTemplate:
+        spec:
+          storageClassName: nfs-client
+          volumeMode: Filesystem
+          resources:
+            requests:
+              storage: 50Gi
+    telemeterClient:
+      nodeSelector:
+        devops: "true"
+    prometheusOperator:
+      nodeSelector:
+        devops: "true"
+    kubeStateMetrics:
+      nodeSelector:
+        devops: "true"
+    openshiftStateMetrics:
+      nodeSelector:
+        devops: "true"
+    thanosQuerier:
+      nodeSelector:
+        devops: "true"
+    k8sPrometheusAdapter:
+      nodeSelector:
+        devops: "true"

@@ -1,0 +1,1 @@
+docker run -d --rm -v /certs:/app/cert -e DOMAIN="*.apps.okd4.ktdemo.duckdns.org" -e DuckDNS_Token="3f309d5c-c04a-4d***" --name=letsencrypt wnsguddk1/wildcard-duckdns-acme:1.0
