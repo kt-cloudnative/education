@@ -11,17 +11,19 @@ Kubernetes Security 구조를  이해한다.
 
 2. K8S Security Overview  
 
-3. Route 에 SSL 인증서 설정     
+3. Network Policy
 
-4. User Account vs Service Account  
+4. Route 에 SSL 인증서 설정     
 
-5. Krew 설명 및 설치  
+5. User Account vs Service Account  
 
-6. Kubernetes 보안 Components  
+6. Krew 설명 및 설치  
 
-7. Security Context
+7. Kubernetes 보안 Components  
 
-8. Pod Security Policy ( PSP )  
+8. Security Context
+
+9. Pod Security Policy ( PSP )  
 
 
 <br/>
@@ -131,6 +133,207 @@ SSL의 버전이 올라가면서 명칭이 TLS로 변경되었지만 기존의 S
 <br/>
 
 <img src="./assets/k8s_security_overview.png" style="width: 100%; height: auto;"/>
+
+<br/>
+
+
+## Network Policy
+
+<br/>
+
+nginx deployment 와 service 를 생성한다.  
+
+```bash
+[root@bastion ] # cat nginx.yaml
+```  
+
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: ghcr.io/shclub/nginx:latest
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1	
+kind: Service	
+metadata:	
+  name: nginx
+  labels: 
+    app: nginx
+spec:	
+  ports:	
+  - port: 80	
+    targetPort: 80
+    name: http
+  selector:	
+    app: nginx
+  type: ClusterIP
+```  
+
+```bash
+[root@bastion ] # kubectl apply -f nginx.yaml
+[root@bastion ] # kubectl get po
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-56569bbd7d-btmph   1/1     Running   0          6m47s
+[root@bastion elastic]# kubectl get svc -n
+NAME    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+nginx   ClusterIP   172.30.69.135   <none>        80/TCP    39m
+```  
+
+<br/>
+
+본인의 nginx pod로 들어가서 다른 namespace 의 service 를 호출 해본다.  
+
+```bash
+[root@bastion ] # kubectl exec -it nginx-deployment-56569bbd7d-btmph sh
+```  
+
+<br/>
+
+다른 namespace 의 서비스를 curl 로 호출해본다.    
+- <Service 명 >.<Namespace 명 >:<Port 번호>  
+
+<br/>
+
+```bash
+~ # curl nginx.edu1
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```  
+
+<br/>
+
+기본적으로 k8s는 다른 namespace 의 리소스를 조회를 할 수는 없지만 POD에서는 다른 Namespace의 서비스를 호출 할 수 있다.  
+
+<br/>
+
+이런 호출 를 막기위해서는 POD 방화벽이 필요하고 그것이 Network Policy 이다.  
+
+<br/>
+
+아래 내용은 `edu1` namespace에서 `edu24` namespace 의 `app: nginx` label을 가진 Pod만 허용한다는 내용입니다.  
+
+```bash
+[root@bastion ] # cat network_policy_nginx.yaml
+```  
+
+```bash
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nginx-policy
+  namespace: edu1
+spec:
+  podSelector:
+    matchLabels:
+      app: nginx
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: edu24
+      ports:
+        - protocol: TCP
+          port: 80
+```
+```bash
+[root@bastion ] # kubectl apply -f network_policy_nginx.yaml
+```  
+Output
+```bash
+networkpolicy.networking.k8s.io/nginx-policy created          
+```  
+
+<br/>
+
+`edu25` namespace에서 edu1 서비스를 호출 해봅니다.   
+접속이 되지 않는것을 확인 할수 있습니다.  
+
+```bash
+[root@bastion elastic]# kubectl exec -it netshoot sh
+kubectl exec [POD] [COMMAND] is DEPRECATED and will be removed in a future version. Use kubectl exec [POD] -- [COMMAND] instead.
+~ # curl nginx.edu1
+```  
+
+<br/>
+
+`edu24` namespace에서 edu1 서비스를 호출 해봅니다.   
+정상적으로 호출이 됩니다.  
+
+```bash  
+[root@bastion elastic]# kubectl exec -it netshoot sh -n edu24
+```  
+```bash
+~ # curl nginx.edu1
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```  
+
+<br/>
+
+참고  
+- Network Policy : https://velog.io/@_zero_/%EC%BF%A0%EB%B2%84%EB%84%A4%ED%8B%B0%EC%8A%A4-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-%EC%A0%95%EC%B1%85NetworkPolicy-%EA%B0%9C%EB%85%90-%EB%B0%8F-%EC%84%A4%EC%A0%95 
+- https://lifeoncloud.kr/entry/Network-Policy  
 
 <br/>
 
