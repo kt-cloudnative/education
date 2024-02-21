@@ -10,7 +10,10 @@ KeyCloak 를 이용한 SSO ( Single Sign On  / Single Sign Out ) 를 구현해 �
 
 3. SpringBoot Backend 연동
 
+4. Frontend/Backend 한번에 배포하기  
+
 <br/>
+
 
 ## 1. KeyCloak 설치 및 실습  
 
@@ -1167,3 +1170,414 @@ web 브라우저에서 https로 연동하여 인증서를 확인힙니다.
 
 <br/>
 
+
+
+## 4. Frontend/Backend 한번에 배포하기  
+
+<br/>
+
+지금까지는 Backend 그리고 Frontend를 별도로 배포하는 방식을 사용을 하였습니다.  
+
+이제 2개의 모듈을 한번에 배포하는 예제를 테스트 하도록 하겠습니다.  
+
+<br/>
+
+먼저 Argocd의 Frontend/Backend Application을 삭제 합니다.    
+
+<br/>
+
+프로젝트를 선택후 X 버튼을 클릭합니다.  
+
+<img src="./assets/argocd_delete1.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+Application 이름을 입력하고 OK 버튼은 클릭하면 삭제가 완료 됩니다.  
+
+<img src="./assets/argocd_delete2.png" style="width: 60%; height: auto;"/>
+ 
+
+<br/>
+
+### ArgoCD Apps-of-Apps 패턴
+
+<br/>
+
+참고 
+- https://jenakim47.tistory.com/75
+- https://malwareanalysis.tistory.com/478
+
+
+<br/>
+
+ArgoCD application을 모아서 관리하는 패턴을 app of apps 패턴이라고 합니다. app of app패턴으로 구성된 application을 sync하면 여러 argoCD application을 생성합니다.  
+
+하나의 폴더에 child application 을 생성하도록 하는 App of Apps 패턴을 사용하게 되면 배포 및 구성할 수 있는 apps 들을 선언적으로 관리 할 수 있습니다.  
+
+- https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/
+
+
+<br/><br/>
+
+App-of-Apps 패턴은 Helm 구조로 구성이 됩니다.    
+
+<br/>
+
+우리는 https://github.com/kt-cloudnative/app-of-apps-keycloak.git repository를 예제로 사용을 합니다.    
+
+fork를 하여 서버에 복사를 먼저 하고 본인의 VM 에 git clone 명령어를  사용하여 다운받습니다.  
+
+<br/>
+
+```bash
+root@newedu-k3s:~# git clone https://github.com/kt-cloudnative/app-of-apps-keycloak.git
+Cloning into 'app-of-apps-keycloak'...
+remote: Enumerating objects: 642, done.
+remote: Counting objects: 100% (642/642), done.
+remote: Compressing objects: 100% (314/314), done.
+remote: Total 642 (delta 295), reused 610 (delta 283), pack-reused 0
+Receiving objects: 100% (642/642), 157.59 KiB | 2.58 MiB/s, done.
+Resolving deltas: 100% (295/295), done.
+root@newedu-k3s:~# cd app-of-apps-keycloak
+root@newedu-k3s:~/app-of-apps-keycloak# tree
+```
+
+<br/>
+
+```bash
+.
+├── README.md
+├── application.yaml
+├── apps
+│   ├── frontend.yaml
+│   └── kustomize-backend.yaml
+├── charts
+│   ├── backend
+│   │   ├── backend-deployment.yaml
+│   │   ├── backend-svc.yaml
+│   │   └── kustomization.yaml
+│   └── frontend
+│       └── manifest.yaml
+```  
+
+<br/>
+
+구조를 보면 Main Application 화일 인 application.yaml 이 있고
+apps 폴더 안에 2개의 폴더가 있습니다.   
+
+- frontend.yaml : React Frontend 관련 yaml ( manifest로 배포 )
+- kustomize-backend.yaml : Kustomize로 SpringBoot Backend 배포 
+
+
+<br/>
+
+application.yaml 화일은 다음과 같고 본인의 namespace 에 맞게 수정이되어야 합니다.
+단 배포를 위한 namespace는 argocd 이어야 합니다.    
+
+이미 다운 받은 화일을 변경하면 됩니다.  
+
+<br/>
+
+application.yaml  
+
+```bash
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: edu-apps  # 이름 변경 필요 
+  namespace: argocd # 수정하지 말것. argocd 유지
+  # Add a this finalizer ONLY if you want these to cascade delete.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+
+spec:
+
+  project: default  # # argocd 프로젝트 이름으로 변경.
+  
+  source:
+    repoURL: https://github.com/kt-cloudnative/app-of-apps-keycloak.git # 본인의 git 주소
+    targetRevision: HEAD
+    path: apps # child Application 폴더 위치
+  
+  destination:
+    server: https://kubernetes.default.svc
+    # The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+    namespace: default  #  본인의 namespace로 변경
+  
+  syncPolicy:
+    automated: 
+      prune: true 
+      selfHeal: true   
+    # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.  
+    syncOptions:
+      - CreateNamespace=false 
+```
+
+<br/>
+
+apps 폴더 아래에 있는 Child Application 2개 yaml 화일에서 사용자의 환경에 맞게 변경합니다.      
+
+<br/>
+
+이미 다운 받은 화일을 변경하면 됩니다.    
+
+> apps 폴더는 아래와 같다.  
+
+<br/>
+
+- frontend.yaml   
+
+  ```bash
+  apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: frontend-with-keycloak  # 본인 Namespace로 변경. <namespace>-frontend
+    namespace: argocd # 절대 변경 하지 말것
+    # Add a this finalizer ONLY if you want these to cascade delete.
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+
+  spec:
+    project: default # argocd 프로젝트 이름으로 변경
+    
+    source:
+      repoURL: https://github.com/kt-cloudnative/app-of-apps-keycloak.git # 본인의 git 으로 변경
+      targetRevision: HEAD
+      path: charts/frontend # chart 폴더 아래 frontend 확인
+    
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: default # 본인의 namespace로 변경
+      
+    syncPolicy:
+      automated: 
+        prune: true 
+        selfHeal: true   
+      # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.  
+      syncOptions:
+        - CreateNamespace=false   
+  ```  
+
+
+  <br/>      
+
+- kustomize-backend.yaml   
+
+  ```bash
+  apiVersion: argoproj.io/v1alpha1
+  kind: Application
+  metadata:
+    name: kustomize-backend # 본인 Namespace로 변경. <namespace>-kustomize-backend
+    namespace: argocd  # 절대 수정 하지 말것
+    # Add a this finalizer ONLY if you want these to cascade delete.
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+
+  spec:
+    project: default # argocd 프로젝트 이름
+    
+    source:
+      repoURL: https://github.com/kt-cloudnative/app-of-apps-keycloak.git # 본인의 git으로 변경
+      targetRevision: HEAD
+      path: charts/backend # charts 폴더안에 backend 확인
+    
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: default # 본인의 namespace
+    
+    syncPolicy:
+      automated: 
+        prune: true 
+        selfHeal: true   
+      # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.  
+      syncOptions:
+        - CreateNamespace=false      
+    ```  
+
+  <br/>        
+
+<br/><br/>
+
+charts 폴더 아래에 있는 Child Application 폴더 (frontend,backend) 의 yaml 화일에서 사용자의 환경에 맞게 변경합니다.      
+
+<br/>
+
+이미 다운 받은 화일을 변경하면 됩니다.  
+
+> charts 폴더는 아래와 같다.  
+
+<br/>
+
+- frontend/manifest.yaml   
+
+  ```bash
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: frontend
+    labels:
+      app: frontend
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: frontend
+    template:
+      metadata:
+        labels:
+          app: frontend
+      spec:
+        containers:
+        - name: frontend
+          image: ghcr.io/kt-cloudnative/vue_crud_security_keycloak:v1 # 본인의  도커 이미지. 없으면 그대로 사용
+          env:
+          - name: BACKEND_API_URL
+            value: "http://backend" 
+          ports:
+          - containerPort: 80
+  ---
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: frontend
+  spec:
+    selector:
+      app: frontend
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 80
+    type: ClusterIP   
+  ---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: front-duckdns-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:
+  # - hosts:
+  #  - frontend-keycloak-ssl.kteducation.duckdns.org
+  #  secretName: edu-tls
+  # # kubectl create secret tls edu-tls --cert /certs/wildcard-cert.pem --key /certs/wildcard-key.pem -n default
+  rules:
+  - host: frontend-keycloak2.kteducation.duckdns.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80   
+  ```  
+
+<br/>
+
+
+- backend/kustomization.yaml   
+
+  ```bash
+  apiVersion: kustomize.config.k8s.io/v1beta1
+  kind: Kustomization
+  resources:
+  - backend-deployment.yaml
+  - backend-svc.yaml     
+  ```  
+
+  <br/>
+
+- backend/backend-svc.yaml   
+
+  ```bash
+  apiVersion: v1	
+  kind: Service	
+  metadata:	
+    name: backend	
+  spec:	
+    ports:	
+    - port: 80	
+      targetPort: 9080	
+    selector:	
+      app: backend
+    type: ClusterIP    
+  ```  
+
+  <br/>
+
+- backend/backend-deployment.yaml   
+
+  ```bash
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: backend
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 3
+    selector:
+      matchLabels:
+        app: backend
+    template:
+      metadata:
+        labels:
+          app: backend
+      spec:
+        containers:
+        - name: backend
+          image: ghcr.io/kt-cloudnative/springboot_crud_security_keycloak:v1 
+          # 본인의 이미지로 변경. 없으면 해당 이미지 사용
+          env:
+          - name: SPRING_PROFILES_ACTIVE
+            value: "local"
+          ports:
+          - containerPort: 9080  
+  ```  
+
+  <br/>
+
+
+<br/>
+
+이제 App-of-Apps 패턴을 배포 합니다.    
+
+```bash
+root@newedu-k3s:~/app-of-apps-keycloak# kubectl apply -f application.yaml
+application.argoproj.io/edu-apps created
+```  
+
+<br/>
+
+POD 를 조회해본다.  
+
+```bash
+root@newedu-k3s:~/app-of-apps-keycloak# kubectl get po
+NAME                                               READY   STATUS    RESTARTS        AGE
+frontend-9bd7c677-q5g5l                            1/1     Running   0               2s
+backend-7b9c67b8f6-bmfvf                           1/1     Running   0               2s
+```  
+
+<br/>
+
+ArgoCD에 가서 3개의 Application 이 생성 된걸 확인 할 수 있다.    
+
+<img src="./assets/app_of_apps1.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+Main Application 인 edu-apps를 클릭한다.    
+
+세부적으로 보면 2개의 Application과 연결 되어 있는 것을 볼 수 있다.
+
+<img src="./assets/app_of_apps2.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+backend 구성을 보실려면 edu-backend를 클릭해서 확인한다.   
+
+
+<img src="./assets/app_of_apps3.png" style="width: 80%; height: auto;"/>
+
+<br/>
