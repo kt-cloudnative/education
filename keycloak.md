@@ -1456,7 +1456,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
 spec:
-  tls:
+  # tls:
   # - hosts:
   #  - frontend-keycloak-ssl.kteducation.duckdns.org
   #  secretName: edu-tls
@@ -1575,7 +1575,7 @@ Main Application 인 edu-apps를 클릭한다.
 
 <br/>
 
-backend 구성을 보실려면 edu-backend를 클릭해서 확인한다.   
+backend 구성을 보실려면 kustomize-backend 를 클릭해서 확인한다.   
 
 
 <img src="./assets/app_of_apps3.png" style="width: 80%; height: auto;"/>
