@@ -1410,45 +1410,46 @@ charts 폴더 아래에 있는 Child Application 폴더 (frontend,backend) 의 y
 
 - frontend/manifest.yaml   
 
-  ```bash
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: frontend
-    labels:
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
       app: frontend
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
+  template:
+    metadata:
+      labels:
         app: frontend
-    template:
-      metadata:
-        labels:
-          app: frontend
-      spec:
-        containers:
-        - name: frontend
-          image: ghcr.io/kt-cloudnative/vue_crud_security_keycloak:v1 # 본인의  도커 이미지. 없으면 그대로 사용
-          env:
-          - name: BACKEND_API_URL
-            value: "http://backend" 
-          ports:
-          - containerPort: 80
-  ---
-  apiVersion: v1
-  kind: Service
-  metadata:
-    name: frontend
-  spec:
-    selector:
-      app: frontend
-    ports:
-      - protocol: TCP
-        port: 80
-        targetPort: 80
-    type: ClusterIP   
-  ---
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/kt-cloudnative/vue_crud_security_keycloak:v1
+        imagePullPolicy: Always
+        env:
+        - name: BACKEND_API_URL
+          value: "backend" 
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -1456,11 +1457,11 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "nginx"
 spec:
-  # tls:
-  # - hosts:
-  #  - frontend-keycloak-ssl.kteducation.duckdns.org
-  #  secretName: edu-tls
-  # # kubectl create secret tls edu-tls --cert /certs/wildcard-cert.pem --key /certs/wildcard-key.pem -n default
+#  tls:
+#  - hosts:
+#    - frontend-keycloak-ssl-apps.kteducation.duckdns.org
+#    secretName: edu-tls
+#    # kubectl create secret tls edu-tls --cert /certs/wildcard-cert.pem --key /certs/wildcard-key.pem -n default
   rules:
   - host: frontend-keycloak2.kteducation.duckdns.org
     http:
@@ -1471,7 +1472,7 @@ spec:
           service:
             name: frontend
             port:
-              number: 80   
+              number: 80  
 ```  
 
 <br/>
