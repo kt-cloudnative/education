@@ -1472,7 +1472,7 @@ spec:
             name: frontend
             port:
               number: 80   
-  ```  
+```  
 
 <br/>
 
