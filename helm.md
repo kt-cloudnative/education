@@ -754,6 +754,7 @@ root@newedu-k3s:~/helm# helm push backend-0.1.0.tgz oci://myharbor.apps.okd4.ktd
 
 <br/>
 
+도커 private registry 로 사용하는 경우는 아래와 같이 설정합니다.  
 
 ```bash
 root@newedu-k3s:~/helm# cat /etc/docker/daemon.json
@@ -767,6 +768,8 @@ root@newedu-k3s:~/helm# cat /etc/docker/daemon.json
 
 <br/>
 
+반드시 도커를 재기동 합니다.  
+
 ```bash
 root@newedu-k3s:/data/springboot-react-keycloak# systemctl daemon-reload
 root@newedu-k3s:/data/springboot-react-keycloak# systemctl restart docker
@@ -774,7 +777,10 @@ root@newedu-k3s:/data/springboot-react-keycloak# systemctl restart docker
 
 <br/>
 
-root@newedu-k3s:/data/springboot-react-keycloak# docker login https://myharbor.apps.okd4.ktdemo.duckdns.org
+docker login을 합니다.  
+
+```bash
+root@newedu-k3s:/data/# docker login https://myharbor.apps.okd4.ktdemo.duckdns.org
 Username: shclub
 Password:
 WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
@@ -782,5 +788,8 @@ Configure a credential helper to remove this warning. See
 https://docs.docker.com/engine/reference/commandline/login/#credentials-store
 
 Login Succeeded
+```  
+<br/>
 
+docker tag를 하고 push 까지 진행을 합니다.  
 
