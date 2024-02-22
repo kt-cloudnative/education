@@ -216,6 +216,7 @@
 
     - 보안 component
     - K8S Security Overview  
+    - Network Policy  
     - Route 에 SSL 인증서 설정     
     - User Account vs Service Account  
     - Krew 설명 및 설치  

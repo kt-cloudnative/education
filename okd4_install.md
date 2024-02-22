@@ -3739,6 +3739,7 @@ command 로 image를 push 하기 위해서는 insecure registry를 설정 해야
 > linux 기준   
 
 docker 의 경우 /etc/docker/daemon.json 화일에 아래와 같이 작성하고  도커를 재시작한다.    
+- 재기동 명령어 : systemctl restart docker
 
 ```bash
 {
