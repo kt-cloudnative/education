@@ -718,6 +718,24 @@ SPRINGBOOT_SECURITY 09:20:41.321 INFO  com.kt.edu.thirdproject.ThirdprojectAppli
 
 로그인 후에 helm push로 harbor registry에 helm chart를 올려봅니다.
 
+Harbor Web UI 에 로그인 하여 edu라는 이름으로 Project를 생성하고 로그인 할 유저를 생성합니다.    
+
+
+<img src="./assets/helm_harbor1.png" style="width: 80%; height: auto;"/>  
+
+
+<br/>
+
+<img src="./assets/helm_harbor2.png" style="width: 80%; height: auto;"/>  
+
+<br/>
+
+생성된 프로젝트에 생성한 계정을 member로 추가합니다.   
+
+<img src="./assets/helm_harbor3.png" style="width: 80%; height: auto;"/>  
+
+
+<br/>
 
 ```bash
 root@newedu-k3s:~/helm# helm registry login -u shclub https://myharbor.apps.okd4.ktdemo.duckdns.org --insecure
@@ -725,6 +743,14 @@ Password:
 WARN[0003] insecure registry https://myharbor.apps.okd4.ktdemo.duckdns.org should not contain 'https://' and 'https://' has been removed from the insecure registry config
 Login Succeeded
 ```  
+<br/>
+
+
+로그인이 완료가 되면 helm push 명령어를 사용하여 helm package를 등록합니다.  
+
+```bash
+root@newedu-k3s:~/helm# helm push backend-0.1.0.tgz oci://myharbor.apps.okd4.ktdemo.duckdns.org/edu
+```
 
 <br/>
 
