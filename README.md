@@ -225,3 +225,7 @@
     - Pod Security Policy ( PSP )  
 
 
+14. Chapter 14 : 5주차   ( [가이드 문서보기](./k8s_observability.md) )
+
+
+15. Charpter 15 : 6주차 ( [가이드 문서보기](./k8s_prometheus.md) )
