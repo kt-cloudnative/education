@@ -1001,7 +1001,29 @@ http_server_requests_seconds_max{method="GET",outcome="SUCCESS",status="200",uri
 
 <br/>
 
-서비스 모니터를 생성한다.  
+서비스 모니터를 생성한다.    
+
+> 서비스 모니터를 생성하기 전에 service 에 label 이 설정되어 있는지 확인한다.     
+
+- 아래 참고
+
+```bash
+apiVersion: v1	
+kind: Service	
+metadata:	
+  name: backend	
+  labels: # service monitor 의 selector 를 위하여 생성
+    app: backend
+spec:	
+  ports:	
+  - port: 80	
+    targetPort: 8080	
+  selector:	
+    app: backend
+  type: NodePort
+```  
+
+<br/>
 
 ```bash
 [root@bastion monitoring]# cat backend-service-monitor.yaml
