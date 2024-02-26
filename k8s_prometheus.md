@@ -1100,52 +1100,6 @@ OKD Console -> Observe -> Metrics 메뉴로 이동한다.
 
 <br/>
 
-Instant Vector  값을 조회해 본다.    
-
-Instant Vector  
-
-Instant Vector는 쿼리 평가 시점 전 가장 최근 샘플의 데이터이며 자신의 모든 값에 대해 타임스탬프를 갖고 있다. Prometheus UI에 다음을 입력해보자.  이 타입만 Graph 가 가능하다.  
-
-```bash
-process_resident_memory_bytes{job="node-exporter"}
-```  
-
-<br/>
-
-<img src="./assets/instant_vector_1.png" style="width: 80%; height: auto;"/>
-
-
-Range Vector  
-
-Range Vector는 쿼리 시점까지 Time Duration에 대해 일치하는 모든 시계열을 가지고 있다. 간단하게 말하면 Instant Vector에 []라는 Range Vector Selector를 사용한 데이터라고 보면 된다. 다음을 쿼리해보자.  
-
-<br/>
-
-<img src="./assets/range_vector_1.png" style="width: 80%; height: auto;"/>
-
-<br/>
-
-```bash
-process_resident_memory_bytes{job="node-exporter"}[1m]
-```  
-
-<br/>
-
-이는 Instant Vector인 process_resident_memory_bytes{job="node-exporter"}를 쿼리한 시점 1분까지의 모든 시계열을 가지는 Range Vector를 반환한다.   
-
-오른쪽 값을 보면 2개가 나오는데, 이는 30초 주기로 Prometheus가 node-exporter를 통해서 데이터를 수집하기 때문이다.   
-
-사실 Range Vector 타입 혼자서 쓰이지는 않고 보통은 rate() 함수랑 같이 쓰인다. 다음을 쿼리해보자.  
-
-```bash
-rate(process_resident_memory_bytes{job="node-exporter"}[1m])
-```   
-
-
-<img src="./assets/rate_1.png" style="width: 80%; height: auto;"/>
-
-<br/>
-
 
 http_server_requests_seconds_count metric 을 아래와 같이 조회해봅니다.  
 
@@ -1483,6 +1437,53 @@ prometheus의 메트릭은 다음과 같이 수집됩니다.
 
 metric 이름이 제일 먼저 나오고, metric의 특징을 표현하는 레이블(label)들이 있습니다. 그리고 가장 마지막으로는 metric 값(value)이 있습니다.
 필요에 따라 timestamp도 표시될 수 있다. timestamp를 보통 출력하지 않는데, 그 이유는 수집하는 순간의 시간으로 값이 기록되기 때문입니다.
+
+<br/>
+
+
+Instant Vector  값을 조회해 본다.    
+
+Instant Vector  
+
+Instant Vector는 쿼리 평가 시점 전 가장 최근 샘플의 데이터이며 자신의 모든 값에 대해 타임스탬프를 갖고 있다. Prometheus UI에 다음을 입력해보자.  이 타입만 Graph 가 가능하다.  
+
+```bash
+process_resident_memory_bytes{job="node-exporter"}
+```  
+
+<br/>
+
+<img src="./assets/instant_vector_1.png" style="width: 80%; height: auto;"/>
+
+
+Range Vector  
+
+Range Vector는 쿼리 시점까지 Time Duration에 대해 일치하는 모든 시계열을 가지고 있다. 간단하게 말하면 Instant Vector에 []라는 Range Vector Selector를 사용한 데이터라고 보면 된다. 다음을 쿼리해보자.  
+
+<br/>
+
+<img src="./assets/range_vector_1.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+```bash
+process_resident_memory_bytes{job="node-exporter"}[1m]
+```  
+
+<br/>
+
+이는 Instant Vector인 process_resident_memory_bytes{job="node-exporter"}를 쿼리한 시점 1분까지의 모든 시계열을 가지는 Range Vector를 반환한다.   
+
+오른쪽 값을 보면 2개가 나오는데, 이는 30초 주기로 Prometheus가 node-exporter를 통해서 데이터를 수집하기 때문이다.   
+
+사실 Range Vector 타입 혼자서 쓰이지는 않고 보통은 rate() 함수랑 같이 쓰인다. 다음을 쿼리해보자.  
+
+```bash
+rate(process_resident_memory_bytes{job="node-exporter"}[1m])
+```   
+
+
+<img src="./assets/rate_1.png" style="width: 80%; height: auto;"/>
 
 <br/>
 
