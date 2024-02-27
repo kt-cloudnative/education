@@ -308,10 +308,10 @@ access key 를 생성한다.
 
 ```bash
 root@newedu-k3s:~/monitoring# cat objstore.yml
-type: S3
+type: s3
 config:
   bucket: "thanos-test"
-  endpoint: "my-minio.minio.svc:9000"
+  endpoint: "minio.kteducation.duckdns.org:31860"
   region: "ap-northeast-2"
   access_key: "FCPYjIq7y****"
   secret_key: "hcbhGG5IlpyROfT****"
@@ -332,6 +332,23 @@ prometheus에서 thanos sidecar를 추가하기 위해 prometheus-thanos-values.
 
 <br/>
 
+thanos sidecar 기능  
+- 백업 : 일정 시간마다 tsdb데이터를 thanos object storage에 저장
+- 질의 : Thanos Querier(Query)가 StoreAPI를 호출하여 Prometheus (local)에 질의  
+
+<br/>
+
+데이터 누락을 방지하기 위한 --min-time 설정  
+- store-api를 통해 요청온 내용에 대한 처리에 대한 지침으로 -2h를 설정하면 2시간 전까지의 데이터는 처리  
+- sidecar가 2시간에 한번씩 2시간 데이터를 object store에 기록하고 compactor는 30분의 대기 후 (consistencyDelay)
+처리하므로 2시간 30 이상 설정해야 함
+
+<br/>
+
+<img src="./assets/thanos_sidecar.png" style="width: 80%; height: auto;"/>    
+
+<br/>
+
 externalLabels 는 여러개의 prometheus를 구분하기 위한 구분자.  
 
 ```bash
@@ -343,6 +360,7 @@ prometheus:
     externalLabels:
       cluster: jake-prometheus
     thanos:
+      minTime: -3h
       objectStorageConfig:
         key: objstore.yml
         name: s3-secret
@@ -437,13 +455,18 @@ root@newedu-k3s:~/monitoring#  helm show values bitnami/thanos > thanos-values.y
   88 ## @param existingObjstoreSecretItems Optional item list for specifying a custom Secret key. If so, path should be objstore.yml
   89 ##
   ...
-   160   stores: # []
-   161   - prometheus-thanos-discovery:10901
+  154   dnsDiscovery:
+  155     enabled: true
+  156     sidecarsService: "prometheus-thanos-discovery"
+  157     sidecarsNamespace: "monitoring"
    ...
-    490   networkPolicy:
-    491     ## @param query.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
-    492     ##
-    493     enabled: false
+  160   stores: # []
+  161   - prometheus-thanos-discovery:10901
+   ...
+   490   networkPolicy:
+   491     ## @param query.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
+   492     ##
+   493     enabled: false
    ...
     927   config: |-
     928     type: IN-MEMORY
