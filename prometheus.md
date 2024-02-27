@@ -112,6 +112,13 @@ values.yaml 화일에서 아래 부분을 수정한다.
 
 <br/>
 
+Thanos 에서 사용을 하기 위해 설정할 수도 있다.  
+
+```bash
+3285     externalLabels: # {}
+3286       cluster: jake-prometheus
+```  
+
 설치를 진행한다.  
 
 ```bash
@@ -338,6 +345,7 @@ prometheus-community/kube-prometheus-stack        	56.8.2       	v0.71.2    	kub
 
 <br/>
 
+externalLabels 는 여러개의 prometheus를 구분하기 위한 구분자.  
 
 ```bash
 root@newedu-k3s:~/monitoring# cat prometheus-thanos-values.yaml
@@ -345,8 +353,8 @@ prometheus:
   thanosService:
     enabled: true
   prometheusSpec:
-    externalLables:
-      cluster: prometheus-1
+    externalLabels:
+      cluster: jake-prometheus
     thanos:
       objectStorageConfig:
         key: objstore.yml
@@ -654,10 +662,11 @@ thanos를 선택하고 up을 입력 한 후 Execute 버튼을 클릭합니다.
 
 <br/>
 
-stores 메뉴를 클릭 해본다.  
+stores 메뉴를 클릭 해본다.    
+
+`sidecar` 의 annotation에  `externalLabels` 로 설정한 `cluster: jake-prometheus` 가 나오는 것을 확인 할 수 있다.  
 
 <img src="./assets/thanos_stores.png" style="width: 80%; height: auto;"/>     
-
 
 <br/>
 
