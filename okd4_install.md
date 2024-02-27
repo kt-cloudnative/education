@@ -3400,7 +3400,7 @@ admin 계정은 로그 아웃 하고 신규 생성한 계정으로 로그인 하
 <br/>
 
 harbor를 docker private registry 로 설치할 예정이고 스토리지는 minio를 사용할 예정이기 때문에 이름을  `harbor-registry` 라는 이름으로 할당하고 create bucket 버튼을 클릭하여 생성한다.
-- versioning 만 체크 한다.
+- versioning 체크 하지 않는다.
 
 <img src="./assets/okd_minio2_bucket2.png" style="width: 80%; height: auto;"/>
 
