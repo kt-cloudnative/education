@@ -292,7 +292,7 @@ minio에서 user 를 생성하고 권한을 할당한다.
 
 <br/>
 
-Users -> Service Accounts 로 이동하여 access key 를 생성한다.  
+access key 를 생성한다.  
 
 <img src="./assets/minio_k3s_access_key.png" style="width: 80%; height: auto;"/>    
 
@@ -330,17 +330,6 @@ kubectl create secret generic s3-secret --from-file=objstore.yml -n monitoring
 
 prometheus에서 thanos sidecar를 추가하기 위해 prometheus-thanos-values.yaml 파일을 생성합니다.     
 
-먼저 prometheus App version 을 확인합니다. 
-
-<br/>
-
-
-```bash
-root@newedu-k3s:~/monitoring# helm search repo prometheus
-NAME                                              	CHART VERSION	APP VERSION	DESCRIPTION
-prometheus-community/kube-prometheus-stack        	56.8.2       	v0.71.2    	kube-prometheus-stack collects Kubernetes manif..
-```  
-
 <br/>
 
 externalLabels 는 여러개의 prometheus를 구분하기 위한 구분자.  
@@ -357,7 +346,6 @@ prometheus:
       objectStorageConfig:
         key: objstore.yml
         name: s3-secret
-      version: v0.71.2
 ```  
 
 
