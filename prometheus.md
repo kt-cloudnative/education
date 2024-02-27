@@ -278,7 +278,7 @@ prom-operator
 
 <br/>
 
-먼저 objstore.yaml 화일을 생성한다.
+먼저 objstore.yml 화일을 생성한다.
 
 아래 config 값은 minio 에서 가져온다.    
 - URL : http://minio.kteducation.duckdns.org:31860/  
@@ -316,13 +316,11 @@ config:
   access_key: "FCPYjIq7y****"
   secret_key: "hcbhGG5IlpyROfT****"
   insecure: true  # http 연결을 위해서
-  trace:
-    enable: true
 ```  
 
 <br/>
 
-objstore.yaml 으로 secret을 생성한다.  
+objstore.yml 으로 secret을 생성한다.  
 
 ```bash
 kubectl create secret generic s3-secret --from-file=objstore.yml -n monitoring
@@ -599,7 +597,7 @@ WARNING: There are "resources" sections in the chart not set. Using "resourcesPr
 
 helm upgrade 명령어  
 
-> helm upgrade -i thanos bitnami/thanos -n monitoring
+> helm upgrade -i thanos bitnami/thanos -f  thanos-values.yaml -n monitoring
 
 <br/>
 
