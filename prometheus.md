@@ -308,7 +308,7 @@ access key 를 생성한다.
 
 ```bash
 root@newedu-k3s:~/monitoring# cat objstore.yml
-type: s3
+type: S3
 config:
   bucket: "thanos-test"
   endpoint: "211.252.87.34:31371"
@@ -316,6 +316,8 @@ config:
   access_key: "FCPYjIq7y****"
   secret_key: "hcbhGG5IlpyROfT****"
   insecure: true  # http 연결을 위해서
+  trace:
+    enable: true
 ```  
 
 <br/>
@@ -407,6 +409,85 @@ NAME                                  TYPE        CLUSTER-IP      EXTERNAL-IP   
 prometheus-thanos-discovery           ClusterIP   None            <none>        10901/TCP,10902/TCP          10m
 ```  
 
+<br/>
+
+sidecar 로그를 확인해본다.  
+
+아래 문구가 있으면 object storage 설정이 안 된것이다.  
+- `no supported bucket was configured, uploads will be disabled`
+
+```bash
+root@newedu-k3s:~# kubectl logs prometheus-prometheus-prometheus-0 -c thanos-sidecar -n monitoring
+ts=2024-02-27T23:36:20.985830138Z caller=sidecar.go:139 level=info msg="no supported bucket was configured, uploads will be disabled"
+ts=2024-02-27T23:36:20.985946975Z caller=options.go:26 level=info protocol=gRPC msg="disabled TLS, key and cert must be set to enable"
+ts=2024-02-27T23:36:20.986777838Z caller=sidecar.go:383 level=info msg="starting sidecar"
+```  
+
+<br/>
+
+prometheus 의 values.yaml 화일에 아래와 같이 직접 입력한다.  
+
+```bash
+3717     thanos: # {}
+3718       # secretProviderClass:
+3719       #   provider: gcp
+3720       #   parameters:
+3721       #     secrets: |
+3722       #       - resourceName: "projects/$PROJECT_ID/secrets/testsecret/versions/latest"
+3723       #         fileName: "objstore.yaml"
+3724       ## ObjectStorageConfig configures object storage in Thanos.
+3725       objectStorageConfig:
+3726       #   # use existing secret, if configured, objectStorageConfig.secret will not be used
+3727         existingSecret:  # {}
+3728           name: "s3-secret"
+3729           key: "objstore.yml"
+```  
+
+<br/>
+
+helm upgrade를 한다.  
+
+```bash
+helm  upgrade -i prometheus prometheus-community/kube-prometheus-stack -n monitoring -f values.yaml -f prometheus-thanos-values.yaml --set fullnameOverride=prometheus
+```
+
+<br/>
+
+로그를 다시 확인한다. 5분정도 시간이 경과 하면 bucket 에 데이터가 쌓이는 것을 확인 할 수 있다.  
+
+```bash
+root@newedu-k3s:~/monitoring# kubectl logs prometheus-prometheus-prometheus-0 -c thanos-sidecar -n monitoring
+ts=2024-02-28T06:39:55.910157646Z caller=options.go:26 level=info protocol=gRPC msg="disabled TLS, key and cert must be set to enable"
+ts=2024-02-28T06:39:55.911233139Z caller=factory.go:53 level=info msg="loading bucket configuration"
+ts=2024-02-28T06:39:55.91163398Z caller=sidecar.go:383 level=info msg="starting sidecar"
+ts=2024-02-28T06:39:55.911754768Z caller=reloader.go:238 level=info component=reloader msg="nothing to be watched"
+ts=2024-02-28T06:39:55.911828868Z caller=intrumentation.go:56 level=info msg="changing probe status" status=ready
+ts=2024-02-28T06:39:55.912116835Z caller=intrumentation.go:75 level=info msg="changing probe status" status=healthy
+ts=2024-02-28T06:39:55.912148658Z caller=grpc.go:131 level=info service=gRPC/server component=sidecar msg="listening for serving gRPC" address=:10901
+ts=2024-02-28T06:39:55.912193623Z caller=http.go:73 level=info service=http/server component=sidecar msg="listening for requests and metrics" address=:10902
+ts=2024-02-28T06:39:55.912289328Z caller=tls_config.go:274 level=info service=http/server component=sidecar msg="Listening on" address=[::]:10902
+ts=2024-02-28T06:39:55.912318684Z caller=tls_config.go:277 level=info service=http/server component=sidecar msg="TLS is disabled." http2=false address=[::]:10902
+ts=2024-02-28T06:39:55.91283031Z caller=sidecar.go:395 level=warn msg="failed to get Prometheus flags. Is Prometheus running? Retrying" err="got non-200 response code: 503, response: Service Unavailable"
+ts=2024-02-28T06:39:57.913225648Z caller=sidecar.go:395 level=warn msg="failed to get Prometheus flags. Is Prometheus running? Retrying" err="got non-200 response code: 503, response: Service Unavailable"
+ts=2024-02-28T06:39:59.912970198Z caller=sidecar.go:395 level=warn msg="failed to get Prometheus flags. Is Prometheus running? Retrying" err="got non-200 response code: 503, response: Service Unavailable"
+ts=2024-02-28T06:40:01.913068015Z caller=sidecar.go:395 level=warn msg="failed to get Prometheus flags. Is Prometheus running? Retrying" err="got non-200 response code: 503, response: Service Unavailable"
+ts=2024-02-28T06:40:03.915455109Z caller=sidecar.go:195 level=info msg="successfully loaded prometheus version"
+ts=2024-02-28T06:40:03.927342718Z caller=sidecar.go:217 level=info msg="successfully loaded prometheus external labels" external_labels="{cluster=\"jake-prometheus\", prometheus=\"monitoring/prometheus-prometheus\", prometheus_replica=\"prometheus-prometheus-prometheus-0\"}"
+ts=2024-02-28T06:40:05.912509518Z caller=shipper.go:263 level=warn msg="reading meta file failed, will override it" err="failed to read /prometheus/thanos.shipper.json: open /prometheus/thanos.shipper.json: no such file or directory"
+ts=2024-02-28T06:40:05.919619394Z caller=shipper.go:361 level=info msg="upload new block" id=01HQMWP110WR121DCR12B43VFB
+ts=2024-02-28T06:40:08.390301269Z caller=shipper.go:361 level=info msg="upload new block" id=01HQN3HCJQVTRRR5KNE1MNYBKY
+ts=2024-02-28T06:40:11.103183938Z caller=shipper.go:361 level=info msg="upload new block" id=01HQNAD3TQ90M8T1KBZ4H3352B
+ts=2024-02-28T06:40:13.739571492Z caller=shipper.go:361 level=info msg="upload new block" id=01HQNH8V2RJ5FEZ3NR80K1V4ZZ
+ts=2024-02-28T06:40:17.288022873Z caller=shipper.go:361 level=info msg="upload new block" id=01HQNR4JAR9VE1VE318M0A6K3K
+ts=2024-02-28T06:40:20.800446271Z caller=shipper.go:361 level=info msg="upload new block" id=01HQNZ09JRP8RGPY4M1GKXE6EV
+ts=2024-02-28T06:40:24.337874208Z caller=shipper.go:361 level=info msg="upload new block" id=01HQP5W0TRD5D5AGV8SRD1WQ1T
+ts=2024-02-28T06:40:28.099045441Z caller=shipper.go:361 level=info msg="upload new block" id=01HQPCQR2RXVD0H4NK1QNQDV3H
+ts=2024-02-28T06:40:32.170727595Z caller=shipper.go:361 level=info msg="upload new block" id=01HQPKKFARRH4ZBJQ6QFNSJSGT
+ts=2024-02-28T06:40:36.345342949Z caller=shipper.go:361 level=info msg="upload new block" id=01HQPTF6JQ12PSFV0G01DNBZQD
+ts=2024-02-28T06:40:40.813674035Z caller=shipper.go:361 level=info msg="upload new block" id=01HQQ1AXTRZK95F0Z538K51BT3
+```  
+
+<br/>
 
 <br/>
 
@@ -707,7 +788,9 @@ minio 의 bucket에서 데이터를 확인 해보면 아직 데이터가 없는�
 
 <br/>
 
-prometheus의 retention 기간이 1일로 되어 있어 bucket에 데이터가 저장되지 않는다.  
+시간이 5분 정도 경과하면 다시 확인해 봅니다.    
+
+<img src="./assets/thanos_minio_save.png" style="width: 80%; height: auto;"/>    
 
 <br/>
 
@@ -789,10 +872,19 @@ helm upgrade -i thanos bitnami/thanos -f  thanos-values.yaml -n monitoring
 <br/>
 
 web 브라우저에서 thanos 로 접속하여 store를 확인합니다.  
+- 아래는 참고용  
+
+<img src="./assets/thanos_store_add.png" style="width: 80%; height: auto;"/>     
 
 <br/>
 
+
 ## 참고
+
+<br/>
+
+prometheus  
+- https://blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221829384846
 
 <br/>
 
@@ -800,6 +892,7 @@ Thanos
 - https://wlsdn3004.tistory.com/30  
 - https://devocean.sk.com/blog/techBoardDetail.do?ID=163458  
 - https://hanhorang31.github.io/post/pkos2-4-monitoring/
+- redis 설정 추가 : https://enix.io/en/blog/thanos-k8s/
 
 <br/>
 
