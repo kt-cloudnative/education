@@ -708,3 +708,100 @@ minio 의 bucket에서 데이터를 확인 해보면 아직 데이터가 없는�
 <br/>
 
 prometheus의 retention 기간이 1일로 되어 있어 bucket에 데이터가 저장되지 않는다.  
+
+<br/>
+
+이제 다른 cluster의 prometheus를 추가합니다.  
+
+prometheus-thanos-discovery-export 이라는 이름으로 서비스를 만듭니다. ( NodePort Type )
+
+<br/>
+
+```bash
+root@newedu-k3s:~/monitoring# cat thanos-discovery-export-svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: prometheus
+    meta.helm.sh/release-namespace: monitoring
+  labels:
+    app: kube-prometheus-stack-thanos-discovery
+    app.kubernetes.io/instance: prometheus
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: 56.8.2
+    chart: kube-prometheus-stack-56.8.2
+    heritage: Helm
+    release: prometheus
+  name: prometheus-thanos-discovery-export
+  namespace: monitoring
+spec:
+  ports:
+  - name: grpc
+    port: 10901
+    protocol: TCP
+    targetPort: grpc
+  - name: http
+    port: 10902
+    protocol: TCP
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: prometheus
+    operator.prometheus.io/name: prometheus-prometheus
+  type: NodePort
+```  
+
+<br/> 
+
+서비스를 생성합니다.
+
+```bash
+root@newedu-k3s:~/monitoring# kubectl apply -f thanos-discovery-export-svc.yaml -n monitoring
+service/prometheus-thanos-discovery-export created
+```  
+
+아래에 node port로 생성된 서비스를 확인합니다.  
+
+```bash
+root@newedu-k3s:~/monitoring# kubectl get svc -n monitoring
+NAME                                  TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                           AGE
+prometheus-thanos-discovery-export    NodePort    10.43.24.88     <none>        10901:31276/TCP,10902:30113/TCP   6s
+```
+
+<br/>
+
+thanos-values.yaml 화일을 수정합니다.  
+
+```bash
+  160   stores: # []
+  161   - prometheus-thanos-discovery:10901
+  162   - 211.252.87.34:31276
+```  
+<br>
+
+thanos를 helm 으로 upgrade 합니다.  
+
+```bash
+helm upgrade -i thanos bitnami/thanos -f  thanos-values.yaml -n monitoring
+```  
+
+<br/>
+
+web 브라우저에서 thanos 로 접속하여 store를 확인합니다.  
+
+<br/>
+
+## 참고
+
+<br/>
+
+Thanos  
+- https://wlsdn3004.tistory.com/30  
+- https://devocean.sk.com/blog/techBoardDetail.do?ID=163458  
+- https://hanhorang31.github.io/post/pkos2-4-monitoring/
+
+<br/>
+
+Grafana
+- https://jerryljh.tistory.com/14
