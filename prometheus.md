@@ -311,7 +311,7 @@ root@newedu-k3s:~/monitoring# cat objstore.yml
 type: s3
 config:
   bucket: "thanos-test"
-  endpoint: "minio.kteducation.duckdns.org:31860"
+  endpoint: "211.252.87.34:31371"
   region: "ap-northeast-2"
   access_key: "FCPYjIq7y****"
   secret_key: "hcbhGG5IlpyROfT****"
@@ -457,8 +457,8 @@ root@newedu-k3s:~/monitoring#  helm show values bitnami/thanos > thanos-values.y
   ...
   154   dnsDiscovery:
   155     enabled: true
-  156     sidecarsService: "prometheus-thanos-discovery"
-  157     sidecarsNamespace: "monitoring"
+  156     sidecarsService: "" # prometheus-thanos-discovery"
+  157     sidecarsNamespace: "" # "monitoring"
    ...
   160   stores: # []
   161   - prometheus-thanos-discovery:10901
