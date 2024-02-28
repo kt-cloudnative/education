@@ -448,7 +448,7 @@ prometheus 의 values.yaml 화일에 아래와 같이 직접 입력한다.
 helm upgrade를 한다.  
 
 ```bash
-helm  upgrade -i prometheus prometheus-community/kube-prometheus-stack -n monitoring -f values.yaml -f prometheus-thanos-values.yaml --set fullnameOverride=prometheus
+helm  upgrade -i prometheus prometheus-community/kube-prometheus-stack -n monitoring -f values.yaml -f prometheus-thanos-values.yaml 
 ```
 
 <br/>
@@ -549,6 +549,11 @@ root@newedu-k3s:~/monitoring#  helm show values bitnami/thanos > thanos-values.y
    492     ##
    493     enabled: false
    ...
+    914 queryFrontend:
+    915   ## @param queryFrontend.enabled Enable/disable Thanos Query Frontend component
+    916   ##
+    917   enabled: true
+    ...
     927   config: |-
     928     type: IN-MEMORY
     929     config:
@@ -565,6 +570,11 @@ root@newedu-k3s:~/monitoring#  helm show values bitnami/thanos > thanos-values.y
     1198     ## @param queryFrontend.networkPolicy.enabled Specifies whether a NetworkPolicy should be created
     1199     ##
     1200     enabled: false
+    ...
+    1455 bucketweb:
+    1456   ## @param bucketweb.enabled Enable/disable Thanos Bucket Web component
+    1457   ##
+    1458   enabled: false
     ...
     1956 compactor:
     1957   ## @param compactor.enabled Enable/disable Thanos Compactor component
@@ -587,6 +597,11 @@ root@newedu-k3s:~/monitoring#  helm show values bitnami/thanos > thanos-values.y
     1974   ## @param compactor.consistencyDelay Minimum age of fresh (non-compacted) blocks before they are being processed
     1975   ##
     1976   consistencyDelay: 30m
+    ...
+    2503 storegateway:
+    2504   ## @param storegateway.enabled Enable/disable Thanos Store Gateway component
+    2505   ##
+    2506   enabled: true
     ...
     2515   #config: # ""
     2516   config: |-
@@ -878,6 +893,16 @@ web 브라우저에서 thanos 로 접속하여 store를 확인합니다.
 
 <br/>
 
+prometheus 데이터를 삭제 해봅니다.  
+
+`values.yaml`에서 `enableAdminAPI` 를 `true` 로 설정하고 helm upgrade를 합니다.  
+
+
+```bash
+3217     enableAdminAPI: true
+```  
+
+<br/>
 
 ## 참고
 
