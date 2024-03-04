@@ -1,0 +1,25 @@
+server:
+  port: 8080
+  
+spring:     
+  devtools:
+    restart:
+      enabled: true
+  datasource:
+    url: jdbc:mysql://mysql:3306/inventory?autoReconnect=true&useSSL=false
+    username: mysqluser
+    password: mysqlpw
+      
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: inventory-event
+      auto-offset-reset: earliest
+      
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:      
+       ack-mode: MANUAL_IMMEDIATE
+    producer:
+      bootstrap-servers: kafka:9092    
+ 
