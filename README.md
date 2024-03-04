@@ -238,6 +238,7 @@
     - Cleancode ( [가이드 문서보기](./cleancode.md) )
     - Repository Pattern ( [가이드 문서보기](./repository_pattern.md) )
     - Spring Cloud Gateway ( [가이드 문서보기](./APIGateway.md) )
+      - 소스 샘플 : https://github.com/kt-cloudnative/scg.git
     - Spring MVC vs WebFlux
 
 17. Charpter 17 : 6주차 ( [가이드 문서보기](./cqrs.md) )
