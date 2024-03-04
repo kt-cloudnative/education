@@ -10,7 +10,7 @@
 
 - **CQRS는 크리스 리처드슨의 '마이크로서비스 패턴'에 나오는 44가지 패턴 중 핵심 패턴 중 하나로 어플리케이션 패턴 중 데이터 패턴 중 조회에 대한 부분이다.**
 
-![img](./assets/msapattern.png)
+![img](./assets_cqrs/msapattern.png)
 
 
 
@@ -18,7 +18,7 @@
 
 - CQRS 이전의 하위 개념인 CQS 에 대한 이해가 필요하다.
 
-  ![img](./assets/cq.png)
+  ![img](./assets_cqrs/cq.png)
 
 - CQS 는 Design By Contract 라는 용어를 만든 버트란드 메이어가 소개한 개념이다.
 
@@ -70,7 +70,7 @@ void getUser(Long userId) {
 
 ### 1.2.3. CQS (Command Query Separation ) 란?
 
- ![img](./assets/cqs.png)
+ ![img](./assets_cqrs/cqs.png)
 
 - 버트란드 메이어는 위의 Command 와 Query 를 분리해야 하며 하나의 함수는 이 성격을 띄어야 한다고 했다.
 
@@ -88,7 +88,7 @@ void getUser(Long userId) {
 
 ## 1.3. CQRS (Command Query Responsibility Separation ) 란?
 
-![img](./assets/cqrs.png)
+![img](./assets_cqrs/cqrs.png)
 
 - CQRS 는**그렉 영**이 소개한 말이고, CQS에 비해 조금 더 큰 레벨에서의 Command 모듈과 Query 모듈의 책임을 분리하자는 말이다.
 
@@ -102,13 +102,13 @@ void getUser(Long userId) {
 
 
 
-![img](./assets/figure1.png)
+![img](./assets_cqrs/figure1.png)
 
 - 위 그림을 보면 하나의 service interface 를 두고 두개의 서로 다른 애플리케이션이 존재한다.
   - **read side**
   - *write side**
 
-- 아래의 그림은 **게임 보드** 라는 가상의 도메인을 모델링한 그림이다.![img](./assets/figure2.png)
+- 아래의 그림은 **게임 보드** 라는 가상의 도메인을 모델링한 그림이다.![img](./assets_cqrs/figure2.png)
   - 사용자는 정답을 입력한다.
   - 정답이라면 점수를 올리고 오답이면 점수를 내린다.
   - 사용자의 랭킹 확인할 수 있다.
@@ -146,7 +146,7 @@ void getUser(Long userId) {
   - 그렇다는 이야기는 **read side 와 write side 의 서버는 서로 다른 기준으로 설계**가 되어야 한다는 것이다.
   - 즉, 독립적으로 확장이 가능해야 하고 각각 목적에 맞는 다른 솔루션이 필요하다는 이야기다.
   - 만약 이 둘이 분리되어 있지 않고 하나의 컴퓨팅 엔진만을 사용한다면 혹은 하나의 데이터소스만을 사용한다면 독립적인 확장이 힘들 것이다.
-  - 하지만 여기서 CQRS 를 적용해서 **책임에 따른 Command 와 Query 의 연산을 각각 독립적으로 분리**시키면 다음과 같은 형태를 띄게 된다.![img](./assets/figure3.png)
+  - 하지만 여기서 CQRS 를 적용해서 **책임에 따른 Command 와 Query 의 연산을 각각 독립적으로 분리**시키면 다음과 같은 형태를 띄게 된다.![img](./assets_cqrs/figure3.png)
 
 - 앞서 보았던 일반적인 CQRS 의 형태와 비슷하게 되었다.
 
@@ -161,7 +161,7 @@ void getUser(Long userId) {
   - Query Side 에는 최적화된 쿼리를 위해서 **JdbcTemplage/MyBatis** 를 사용할 수 있을 것이다.
 
 - CQRS 더 고도화 시켜볼 수 있다
-  - Command 와 Query 의 책임이 분리되었기 때문에 Command 와 Query 는 서로 다른 인프라가 구성될 수 있다.![img](./assets/figure5.png)
+  - Command 와 Query 의 책임이 분리되었기 때문에 Command 와 Query 는 서로 다른 인프라가 구성될 수 있다.![img](./assets_cqrs/figure5.png)
   - 그럼 위와 같이 Polyglot 한 Persistence Infra 가 구성될 수 있다.
   - Command infra 에는 write 에 최적화된 DB를 사용할 수 있을 것이다.
   - Query Side 에는 더욱 빠른 쿼리을 위해서 elasticsearch나 와 같은 검색 엔진을 도입할 수 있을 것이다.
@@ -287,7 +287,7 @@ void getUser(Long userId) {
 - 명령과 쿼리 모델이 한 프로세스에 있는지 다른 프로세스에 있는지
 - 같은 DB를 사용하는지 다른 DB를 사용하는지
 
-![img](./assets/figure6.png)
+![img](./assets_cqrs/figure6.png)
 
 
 
@@ -298,7 +298,7 @@ void getUser(Long userId) {
 
 
 
-![img](./assets/figure7.png)
+![img](./assets_cqrs/figure7.png)
 
 
 
@@ -312,7 +312,7 @@ void getUser(Long userId) {
   - 쿼리 모델은 이 테이블을 이용해서 구현
 - 명령이 상태를 변경할때 쿼리 전용 테이블을 함께 변경된다.
 
-![img](./assets/figure8.png)
+![img](./assets_cqrs/figure8.png)
 
 
 
@@ -323,7 +323,7 @@ void getUser(Long userId) {
 
 
 
-![img](./assets/figure9.png)
+![img](./assets_cqrs/figure9.png)
 
 ### 1.8.3.1. 구현: 다른 프로세스, 다른 DB
 
@@ -332,7 +332,7 @@ void getUser(Long userId) {
 
 
 
-![img](./assets/figure10.png)
+![img](./assets_cqrs/figure10.png)
 
 ### 1.8.3.2. 다른 DB로 변경 전파
 
@@ -354,7 +354,7 @@ void getUser(Long userId) {
 
 
 
-![img](./assets/figure11.png)
+![img](./assets_cqrs/figure11.png)
 
 
 
@@ -733,7 +733,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
 - 다운로드 :  https://spring.io/tools
 
-- ![image-20221023203106620](./assets/figure12.png)
+- ![image-20221023203106620](./assets_cqrs/figure12.png)
 
 - 실행
 
@@ -747,7 +747,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
 - 다운로드 : https://projectlombok.org/download
 
-![image-20221023202639158](./assets/figure13.png)
+![image-20221023202639158](./assets_cqrs/figure13.png)
 
 - 실행
 
@@ -757,7 +757,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
 - 설치
 
-  ![image-20221023202859386](./assets/figure15.png)
+  ![image-20221023202859386](./assets_cqrs/figure15.png)
 
 
 
@@ -767,7 +767,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
 - 다운로드 : https://www.docker.com/products/docker-desktop/
 
-  ![image-20221109101222977](./assets/figure16.png)
+  ![image-20221109101222977](./assets_cqrs/figure16.png)
 
 - 설치
   
@@ -784,7 +784,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
 - 다운로드 : https://git-scm.com/downloads
 
-![image-20221109101643467](./assets/figure17.png)
+![image-20221109101643467](./assets_cqrs/figure17.png)
 
 - 설치
 
@@ -794,7 +794,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
   - 프로그램 목록에서 Git Bash를 실행한다.
 
-  ![image-20221109101746785](./assets/figure19.png)
+  ![image-20221109101746785](./assets_cqrs/figure19.png)
 
 
 
@@ -838,7 +838,7 @@ Azul Platform Core OpenJDK 지원 구독을 통해 Temurin 에 대한 상용 지
 
 ### 3.5.2. 아키텍처 구성
 
-<img src="./assets/figure20.png" alt="image-20221110163349664" style="zoom:150%;" />
+<img src="./assets_cqrs/figure20.png" alt="image-20221110163349664" style="zoom:150%;" />
 
 
 
@@ -1308,7 +1308,7 @@ http://localhost:8080/h2-console/
 
 ### 3.6.2. 아키텍처 구성
 
-<img src="./assets/figure21.png" alt="image-20221110163529502" style="zoom:150%;" />
+<img src="./assets_cqrs/figure21.png" alt="image-20221110163529502" style="zoom:150%;" />
 
 ### 3.6.3 실습
 
@@ -1956,7 +1956,7 @@ http://localhost:8080/h2-console/
 
 ### 3.7.2. 아키텍처 구성
 
-<img src="./assets/figure22.png" alt="image-20221110163507335" style="zoom:150%;" />
+<img src="./assets_cqrs/figure22.png" alt="image-20221110163507335" style="zoom:150%;" />
 
 ### 3.7.3. 실습
 
@@ -2469,7 +2469,7 @@ http://localhost:8080/h2-console/
 
 ### 3.8.2. 아키텍처 구성
 
-<img src="./assets/figure23.png" alt="image-20221110174211176" style="zoom:150%;" />
+<img src="./assets_cqrs/figure23.png" alt="image-20221110174211176" style="zoom:150%;" />
 
 ### 3.8.3 실습
 
@@ -3050,7 +3050,7 @@ http://localhost:8080/h2-console/
 
 ### 3.9.2. 아키텍처 구성
 
-<img src="./assets/figure24.png" alt="image-20221110174238341" style="zoom:150%;" />
+<img src="./assets_cqrs/figure24.png" alt="image-20221110174238341" style="zoom:150%;" />
 
 ### 3.9.3 실습
 
@@ -3831,7 +3831,7 @@ http://localhost:8080/h2-console/
 
 ### 3.10.2. 아키텍처 구성
 
-<img src="./assets/figure26.png" alt="image-20221110163657186" style="zoom:150%;" />
+<img src="./assets_cqrs/figure26.png" alt="image-20221110163657186" style="zoom:150%;" />
 
 ### 3.10.3 실습
 
@@ -4425,7 +4425,7 @@ http://localhost:8080/h2-console/
 
 ### 3.11.2. 아키텍처 구성
 
-<img src="./assets/figure27.png" alt="image-20221111142121633" style="zoom:150%;" />
+<img src="./assets_cqrs/figure27.png" alt="image-20221111142121633" style="zoom:150%;" />
 
 ### 3.11.3. 실습 - Docker 환경 구성
 
@@ -5622,7 +5622,7 @@ http://localhost:8080/h2-console/
 
 ### 3.12.2. 아키텍처 구성
 
-<img src="./assets/figur36.png" alt="image-20221111141952064" style="zoom:150%;" />
+<img src="./assets_cqrs/figur36.png" alt="image-20221111141952064" style="zoom:150%;" />
 
 
 
@@ -6780,7 +6780,7 @@ root entity 로 알려진 Aggregate Root 는 애그리거트에 접근할 수 �
 
 - 각 바운디드 컨텍스트는 자체적인 유비쿼터스 언어를 가지게 될 수 있고 자체적인 개념이 존재할 수도 있다.
 
-[![image](./assets/figure28.png)](https://user-images.githubusercontent.com/48385288/187064826-4bff4c3f-e8d5-4340-9b69-dea986ab38e1.png)
+[![image](./assets_cqrs/figure28.png)](https://user-images.githubusercontent.com/48385288/187064826-4bff4c3f-e8d5-4340-9b69-dea986ab38e1.png)
 
 - 위 그림은 우리가 journey 에서 구현한 컨퍼런스 관리 시스템이 여러 바운디드 컨텍스트로 분리된 것을 보여준다.
 
@@ -6854,7 +6854,7 @@ root entity 로 알려진 Aggregate Root 는 애그리거트에 접근할 수 �
 
 - 아래의 그림은 영속성 자장 장치부터 UI 까지, 포함된 모든 컴포넌트를 보여준다.
 
-[![image](./assets/figure29.png)](https://user-images.githubusercontent.com/48385288/187066142-712a959c-6052-406f-9060-b8ee16a860e9.png)
+[![image](./assets_cqrs/figure29.png)](https://user-images.githubusercontent.com/48385288/187066142-712a959c-6052-406f-9060-b8ee16a860e9.png)
 
 - 복잡성을 관리하는 것 이외에도, 시스템을 바운디드 컨텍스트로 나누는 또 다른 이점이 있다.
 
@@ -7552,7 +7552,7 @@ public enum Error {
 
 - Repository Pattern 은 2004 년 에릭 에반스의 Domain-Driven-Design 에서 처음 소개된 개념으로, 공통적인 데이터 Access & Manipluate 에 집중하여 **도메인 모델 계층과 구현 기술을 분리**시키는 것을 의미한다.
 
- ![img](./assets/figure30.png)
+ ![img](./assets_cqrs/figure30.png)
 
 - 이렇게 함으로써 RDB 나 Query 와 같이 어떠한 **구현 기술에 종속적이지 않고 도메인에 더욱 집중**할 수 있게 되는 패턴을 의미한다.
 
@@ -7560,7 +7560,7 @@ public enum Error {
 
 - repository 는 영속성 장치에서 쿼리의 결과로 받아온 데이터를 repository 에서는 domain 에서 사용하기 적합하도록 Domain 객체로 mapping 하는 역할을 수행한다.
 
-![img](./assets/figure31.png)
+![img](./assets_cqrs/figure31.png)
 
 - 위 그림은 Jpa 를 사용할 떄 기본으로 사용되는 Repository 의 구현체인 (정확히는 `JpaRepository` 의 구현체) `SimpleJpaRepository` 클래스이다.
 
@@ -7581,7 +7581,7 @@ public enum Error {
 
 
 
-![img](./assets/figure32.png)
+![img](./assets_cqrs/figure32.png)
 
 - 가운데 있는 Infrastructure Persistence Layer 가 바로 Repository 가 존재하는 레이어이다.
 
@@ -7603,7 +7603,7 @@ public enum Error {
 
 - 즉, **고수준 모듈**(의미 있는 단일 기능)이 **저수준 모듈**(고수준 모듈을 구현하기 위한 기능)에 의존하지 않도록 하기 위함인데, 단지 **선언과 구현을 분리** 쯤으로 생각한다면 잘못된 DIP 의 결과가 나올 수 있다.
 
-- 예를 들면 아래와 같은 형태로 말이다.![img](./assets/figure33.png)
+- 예를 들면 아래와 같은 형태로 말이다.![img](./assets_cqrs/figure33.png)
 
 - 이렇게 된다면 Repository 를 다양한 형태의 구현으로 다형적이게 만든다는 조건은 만족시켰다.
 
@@ -7613,11 +7613,11 @@ public enum Error {
 
 - 그래서 이를 해결하기 위해서 `OrderRepository` 를 고수준 모듈로 만드는 것이다.
 
- ![img](./assets/figure34.png)
+ ![img](./assets_cqrs/figure34.png)
 
 이렇게 된다면 하나의 추상적인 Repository 에 대해서 다양한 구현이 가능하게 된다.
 
- ![img](./assets/figure35.png)
+ ![img](./assets_cqrs/figure35.png)
 
 - 결국 **Repository 는 Jpa 진영에서 DB 와 연결하기 위한 layer 로 부르는 것이 아니라는 것**을 알 수 있다.
 
