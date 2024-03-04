@@ -229,3 +229,15 @@
 
 
 15. Charpter 15 : 6주차 ( [가이드 문서보기](./k8s_prometheus.md) )
+
+16. Charpter 15 : 6주차 ( [가이드 문서보기](./cqrs.md) )
+
+    - CQRS 패턴
+    - Spring MVC vs WebFlux
+    - Spring Cloud Gateway
+
+17. Charpter 15 : 6주차 ( [가이드 문서보기](./cqrs.md) )
+
+    - Cache 패턴
+    - Async 패턴
+    - Service Mesh 패턴
