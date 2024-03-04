@@ -230,9 +230,14 @@
 
 15. Charpter 15 : 6주차 ( [가이드 문서보기](./k8s_prometheus.md) )
 
-16. Charpter 16 : 6주차 ( [가이드 문서보기](./cqrs.md) )
+16. Charpter 16 : 6주차 
 
-    - CQRS 패턴
+    - D.D.D ( [가이드 문서보기](./ddd.md) )
+    - CQRS 패턴 ( [가이드 문서보기](./cqrs.md) )
+      - 소스 샘플 : https://github.com/kt-cloudnative/cqrs
+      - 참고 : https://github.com/kirobo77/cqrs
+    - Cleancode ( [가이드 문서보기](./cleancode.md) )
+    - Repository Pattern ( [가이드 문서보기](./repository_pattern.md) )
     - Spring MVC vs WebFlux
     - Spring Cloud Gateway
 
