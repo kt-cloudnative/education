@@ -125,7 +125,8 @@
 4. Chapter 4 : 3주차  ( [가이드 문서보기](./chapter4.md) )  
 
      - VM 기반으로 Jenkins 설치 및 설정 , GitHub , Docker 계정 생성 , Jenkins Pipeline 생성하여 CI 실습  
-     - 샘플 소스 : [ 소스 보기 ](https://github.com/kt-cloudnative/edu1)  
+     - 샘플 소스 : [ 소스 보기 ](https://github.com/kt-cloudnative/edu1)    
+     - Jenkins 설치 : ( [가이드 문서보기](./jenkins_install.md) )  
 
     <br/>
 
@@ -201,11 +202,15 @@
           - ArgoCD Apps-of-Apps 패턴 
 
 9. Chapter 9 : 4주차   ( [가이드 문서보기](./airflow.md) ) 
+     - SpringBatch 소개 및 실습
+     - Apache Airflow 소개 및 실습
 
 10. Chapter 10 : 4주차   ( [가이드 문서보기](./kafka.md) ) 
+     - Kafka 소개 및 실습
 
 11. Chapter 11 : 4주차   ( [가이드 문서보기](./redis.md) ) 
-
+     - Redis 소개 및 실습
+     
 12. Chapter 12 : 4주차   ( [가이드 문서보기](./keycloak.md) ) 
 
      - KeyCloak 설치 및 실습 
@@ -226,9 +231,11 @@
 
 
 14. Chapter 14 : 5주차   ( [가이드 문서보기](./k8s_observability.md) )
-
+    - Observability 소개
 
 15. Charpter 15 : 6주차 ( [가이드 문서보기](./k8s_prometheus.md) )
+    - Prometheus 설명 및 실습
+    - prometheus & Thanos 설치 ( [가이드 문서보기](./prometheus.md) )
 
 16. Charpter 16 : 6주차 ( [참고](https://github.com/kirobo77) )
 
@@ -238,11 +245,13 @@
     - Cleancode ( [가이드 문서보기](./cleancode.md) )
     - Repository Pattern ( [가이드 문서보기](./repository_pattern.md) )
     - Spring Cloud Gateway ( [가이드 문서보기](./APIGateway.md) )
-      - 소스 샘플 : https://github.com/kt-cloudnative/scg.git
+      - 소스 샘플 : https://github.com/kt-cloudnative/scg
     - Spring MVC vs WebFlux
+    
 
 17. Charpter 17 : 6주차 ( [가이드 문서보기](./cqrs.md) )
 
+    - CircuitBreaker 패턴 ( Resillience4J )
     - Cache 패턴
     - Async 패턴
     - Service Mesh 패턴
