@@ -237,8 +237,8 @@
     - Prometheus 설명 및 실습
     - prometheus & Thanos 설치 ( [가이드 문서보기](./prometheus.md) )
 
-16. Charpter 16 : 6주차 ( [참고](https://github.com/kirobo77) )
-
+16. Charpter 16 : 6주차 ( MSA패턴 1 )
+    - krirobo77 사이트: [참고](https://github.com/kirobo77) 
     - D.D.D ( [가이드 문서보기](./ddd.md) )
     - CQRS 패턴 ( [가이드 문서보기](./cqrs.md) )
       - 소스 샘플 : https://github.com/kt-cloudnative/cqrs
@@ -249,9 +249,10 @@
     - Spring MVC vs WebFlux
     
 
-17. Charpter 17 : 6주차 ( [가이드 문서보기](./cqrs.md) )
+17. Charpter 17 : 6주차 (  MSA 패턴 2 )
 
+    - Cache 패턴 ( [가이드 문서보기](./cache-patterns.md) ) 
+      - 소스 샘플 : https://github.com/kt-cloudnative/cache
     - CircuitBreaker 패턴 ( Resillience4J )
-    - Cache 패턴
     - Async 패턴
     - Service Mesh 패턴
