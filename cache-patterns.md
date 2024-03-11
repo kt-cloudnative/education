@@ -232,7 +232,7 @@ Redis는 메모리 기반 캐시 솔루션으로 데이타 적재 시 적절한 
 - 실습 애플리케이션은 아래의 Git을 통해 다운로드 받을수 있다.
 
   ```shell
-  git clone https://github.com/kirobo77/cache.git
+  git clone https://github.com/kt-cloudnative/cache.git
   ```
 
   
