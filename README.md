@@ -249,10 +249,18 @@
     - Spring MVC vs WebFlux
     
 
-17. Charpter 17 : 6주차 (  MSA 패턴 2 )
+17. Charpter 17 : 7주차 (  MSA 패턴 2 )
 
     - Cache 패턴 ( [가이드 문서보기](./cache-patterns.md) ) 
       - 소스 샘플 : https://github.com/kt-cloudnative/cache
     - CircuitBreaker 패턴 ( Resillience4J )
     - Async 패턴
-    - Service Mesh 패턴
+    - Openfeign 
+    - Service Mesh 패턴 ( [가이드 문서보기](./service_mesh_patterns.md) ) 
+
+
+18. Chapter 18: 8주차 ( Observability )
+
+     - Opensearch ( [가이드 문서보기](./opensearch.md) ) 
+     - elastic stack ( [가이드 문서보기](./elastic_stack.md) ) 
+
