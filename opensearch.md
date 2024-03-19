@@ -72,11 +72,170 @@ Elastic Stack은 주로 Logstash 를 사용을 하고 opensearch는 Data Prepper
 
 <br/>
 
+### Opensearch 설치 ( k3s )
+
+<br>
+
+opensearch 폴더를 생성합니다.  
+
+<br>
+
+```bash
+root@newedu-k3s:~# mkdir -p opensearch
+```  
+
+<br/>
+
+
+k3s에 Opensearch는 bitnami helm chart를 사용 합니다.  
+
+```bash
+root@newedu-k3s:~/opensearch# helm show values  bitnami/opensearch > bitnami_values.yaml
+```  
+
+<br/>
+
+기준 : master 1개와 data 1개 pod를 기동합니다.  
+
+
+bitnami_values.yaml 화일을 수정합니다.  
+
+```yaml
+  19   imagePullSecrets: []
+  20   storageClass: "nfs-client"  # dynamic provisioning
+  21   ## Compatibility adaptations for Kubernetes platforms
+...
+ 205 ## X-Pack security parameters
+ 206 ## Note: TLS configuration is required in order to configure password authentication
+ 207 ##
+ 208 security:
+ 209   ## @param security.enabled Enable X-Pack Security settings
+ 210   ##
+ 211   enabled: true  # 비밀번호 필요 없으면 false
+ 212   ## @param security.adminPassword Password for 'admin' user
+ 213   ## Ref: https://github.com/bitnami/containers/tree/main/bitnami/opensearch#security
+ 214   ##
+ 215   adminPassword: "admin"
+ 216   ## @param security.logstashPassword Password for Logstash
+ 217   ##
+ 218   logstashPassword: "admin"
+ 219   ## @param security.existingSecret Name of the existing secret containing the OpenSearch password and
+ 220   ##  
+...
+ 506 ## @section Master-eligible nodes parameters
+ 507 master:
+ 508   ## @param master.masterOnly Deploy the OpenSearch master-eligible nodes as master-only nodes. Recommended for high-demand d     eployments.
+ 509   ## If you are
+ 510   masterOnly: true  # single node
+ 511   ## @param master.replicaCount Number of master-eligible replicas to deploy
+ 512   ##
+ 513   replicaCount: 1
+...
+ 789   persistence:
+ 790     ## @param master.persistence.enabled Enable persistence using a `PersistentVolumeClaim`
+ 791     ##
+ 792     enabled: true  # master
+ 793     ## @param master.persistence.storageClass Persistent Volume Storage Class  
+...
+ 840   networkPolicy:
+ 841     ## @param master.networkPolicy.enabled Enable creation of NetworkPolicy resources
+ 842     ##
+ 843     enabled: false
+...
+ 931 ## @section Data-only nodes parameters
+ 932 data:
+ 933   ## @param data.replicaCount Number of data-only replicas to deploy
+ 934   ##
+ 935   replicaCount: 1  # data node
+ 936   ## @param data.extraRoles Append extra roles to the node role
+ 937   ##
+...
+1207   persistence:
+1208     ## @param data.persistence.enabled Enable persistence using a `PersistentVolumeClaim`
+1209     ##
+1210     enabled: true 
+...
+1350 coordinating:
+1351   ## @param coordinating.replicaCount Number of coordinating-only replicas to deploy
+1352   ##
+1353   replicaCount: 0
+... 
+1730 ingest:
+1731   ## @param ingest.enabled Enable ingest nodes
+1732   ##
+1733   enabled: false
+1734   ## @param ingest.replicaCount Number of ingest-only replicas to deploy
+1735   ##
+1736   replicaCount: 0
+...  
+2381 dashboards:
+2382   ## @param dashboards.enabled Enables OpenSearch Dashboards deployment
+2383   ##
+2384   enabled: true # 대쉬보드 설치
+2385   ## Bitnami OpenSearch Dashboards image
+...
+2963   persistence:
+2964     ## @param dashboards.persistence.enabled Enable persistence using Persistent Volume Claims
+2965     ##
+2966     enabled: true
+2967     ## @param dashboards.persistence.mountPath Path to mount the volume at.
+2968     ##
+2969     mountPath: /bitnami/opensearch-dashboards
+2970     ## @param dashboards.persistence.subPath The subdirectory of the volume to mount to, useful in dev environments and one P     V for multiple services
+2971     ##
+2972     subPath: "dashboard"
+...
+```
+
+<br/>
+
+helm 으로 설치 합니다.  
+
+```bash
+root@newedu-k3s:~/opensearch# helm install opensearch  bitnami/opensearch -f bitnami_values.yaml -n opensearch
+```  
+
+<br/>
+
+Pod 를 조회해 본다.  
+
+```bash
+root@newedu-k3s:~/opensearch# kubectl get po -n opensearch
+NAME                                                   READY   STATUS    RESTARTS   AGE
+opensearch-master-0                                    1/1     Running   0          22h
+opensearch-data-0                                      1/1     Running   0          22h
+opensearch-dashboards-7b85dc86d5-55zsv                 1/1     Running   0          22h
+```  
+
+<br/>
+
+Dashboard 서비스를 NodePort 로 오픈한다.
+
+```bash
+root@newedu-k3s:~/opensearch# kubectl get svc -n opensearch
+NAME                                           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                  AGE
+opensearch-data-hl                             ClusterIP   None            <none>        9200/TCP,9300/TCP                        22h
+opensearch-master-hl                           ClusterIP   None            <none>        9200/TCP,9300/TCP                        22h
+opensearch                                     ClusterIP   10.43.126.220   <none>        9200/TCP,9300/TCP                        22h
+opensearch-dashboards                          NodePort    10.43.30.174    <none>        5601:30023/TCP                        22h
+```  
+
+<br/>
+
+### Data Prepper 설치
+
+<br/>
+
 먼저 데이터를 수집하고 Opensearch 로 보내기 위한 Data Prepper를 설정합니다.  
 configmap 을 생성하기 위한 yaml 화일을 만든다.  
 
 ```bash
 [root@bastion opensearch]# cat data_prepper_config.yaml
+```  
+
+bitnami 로 설치한 경우는 host 를 `http://opensearch:9200` 로 변경.
+
+```bash
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -232,6 +391,9 @@ service 와 deployment 를 생성하기 위한 yaml 화일을 만든다.
 
 ```bash
 [root@bastion opensearch]# cat data_prepper_manifest.yaml
+```  
+
+```bash
 apiVersion: v1
 kind: Service
 metadata:
@@ -310,7 +472,6 @@ spec:
                 path: pipelines.yaml
 ```  
 
-
 <br/>
 
 생성한 yaml 화일을 적용한다.  
@@ -318,23 +479,32 @@ spec:
 <br/>
 
 ```bash
-[root@bastion opensearch]# kubectl apply -f data_perpper_config.yaml -n opensearch
+[root@bastion opensearch]# kubectl apply -f data_prepper_config.yaml -n opensearch
 configmap/data-prepper-config created
 [root@bastion opensearch]# kubectl apply -f data_prepper_manifest.yaml -n opensearch
 service/data-prepper created
 deployment.apps/data-prepper created
+```  
+
+```bash
 [root@bastion opensearch]# kubectl get svc -n opensearch
 NAME                                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                  AGE
 data-prepper                                 ClusterIP   172.30.96.92     <none>        21890/TCP,21891/TCP,21892/TCP,4900/TCP   7s
 opensearch-cluster-master                    ClusterIP   172.30.175.101   <none>        9200/TCP,9300/TCP                        4d14h
 opensearch-cluster-master-headless           ClusterIP   None             <none>        9200/TCP,9300/TCP,9600/TCP               4d14h
 opensearch-dashboard-opensearch-dashboards   ClusterIP   172.30.185.79    <none>        5601/TCP                                 4d14h
+```  
+
+```bash
 [root@bastion opensearch]# kubectl get configmap -n opensearch
 NAME                               DATA   AGE
 data-prepper-config                2      31s
 kube-root-ca.crt                   1      4d23h
 opensearch-cluster-master-config   1      4d14h
 openshift-service-ca.crt           1      4d23h
+```  
+
+```bash
 [root@bastion opensearch]# kubectl get po -n opensearch
 NAME                                                         READY   STATUS    RESTARTS   AGE
 data-prepper-7c47579dcc-fbztw                                1/1     Running   0          3m16s
@@ -346,7 +516,7 @@ opensearch-dashboard-opensearch-dashboards-878bcb586-v49jz   1/1     Running   0
 
 <br/>
 
-web 브라우저에서 대쉬보드로 로그인 하고 Index Management -> Indices 로 이동하면 아래의 4개 index가 생성 된 것을 확인 할 수 있다.  
+web 브라우저에서 대쉬보드로 로그인 하고 Index Management -> Indices 로 이동하면 아래의 4개 index가 생성 된 것을 확인 할 수 있다.  아직 데이터가 들어오지는 않는다.  
 
 
 <img src="./assets/opensearch_2.png" style="width: 60%; height: auto;"/>
@@ -566,6 +736,11 @@ opentelemetry-operator has been installed. Check its status by running:
   kubectl --namespace opensearch get pods -l "release=opentelemetry"
 
 Visit https://github.com/open-telemetry/opentelemetry-operator for instructions on how to create & configure OpenTelemetryCollector and Instrumentation custom resources by using the Operator.
+```  
+
+<br/>
+
+```bash
 [root@bastion opensearch]# kubectl get po -n opensearch
 NAME                                                         READY   STATUS    RESTARTS   AGE
 data-prepper-7c47579dcc-fbztw                                1/1     Running   0          55m
@@ -743,6 +918,8 @@ spec:
 
 <br/>
 
+설치를 한다.  
+
 ```bash
 [root@bastion opensearch]# kubectl apply -f opentelemetry_edu_collector.yaml -n opensearch
 opentelemetrycollector.opentelemetry.io/edu created
@@ -907,8 +1084,8 @@ spec:
             cpu: 2
             memory: "900Mi"
           requests:
-            cpu: 2
-            memory: "900Mi"
+            cpu: 0.2
+            memory: "100Mi"
 ```  
 
 <br/>

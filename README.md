@@ -262,5 +262,5 @@
 18. Chapter 18: 8주차 ( Observability )
 
      - Opensearch ( [가이드 문서보기](./opensearch.md) ) 
-     - elastic stack ( [가이드 문서보기](./elastic_stack.md) ) 
+     - Elastic stack ( [가이드 문서보기](./elastic_stack.md) ) 
 
