@@ -255,7 +255,7 @@
       - 소스 샘플 : https://github.com/kt-cloudnative/cache
     - CircuitBreaker 패턴 ( Resillience4J )
     - Async 패턴
-    - Openfeign 
+    - Openfeign  ( [가이드 문서보기](./openfeign.md) ) 
     - Service Mesh 패턴 ( [가이드 문서보기](./service_mesh_patterns.md) ) 
 
 
