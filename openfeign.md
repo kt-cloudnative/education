@@ -8,9 +8,7 @@ Opefeign 를 통해 마이크로 서비스간의 호출 관계를 이해한다.
 
 2. FeignClient 사용법
 
-3. SpringBoot Backend 연동
-
-4. Frontend/Backend 한번에 배포하기  
+3. 참고
 
 <br/>
 
@@ -229,3 +227,12 @@ SpringBoot를 기동하고 웹브라우저 에서 서비스를 호출 해본다.
 <br/>
 
 정상적으로 호출 되는 것을 확인 할 수 있다.  
+
+<br/>
+
+## 3. 참고
+
+<br/>
+
+https://wildeveloperetrain.tistory.com/m/172
+
