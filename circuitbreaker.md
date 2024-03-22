@@ -30,7 +30,7 @@ CircuitBreaker 를 이해 하고 실습 할수 있다.
 
 다음과 같은 상태들이 있다.  
 
-<img src="./assets/circuitbreak1.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/circuitbreaker1.png" style="width: 80%; height: auto;"/>  
 
 
 <br/>
@@ -139,7 +139,7 @@ Resilience4j는 일련의 내결함성 패턴을 구현하고, 이러한 패턴�
 
 <br/>
 
-### `application.yml` 설정
+### `application-local.yml` 설정
 
 <br/>
 
@@ -189,6 +189,26 @@ resilience4j.circuitbreaker:
  ```  
 <br/>
 
+### Class에 `CircuitBreaker` 설정
+
+<br/>
+
+기존에 구현한 Spring Cloud Gateway 에서 route 대상인 서비스를 connection 안 되도록 해야 하기 때문에 기동하지 않는다.  
+
+webfilter를 implement 해서 로그를 찍기 때문에 LoggingWebFilter 라는 class 에서 circuitbreaker를 설정한다.  
+
+이름은 application-local.yaml 에서 설정한 instance 이름 이다.
+
+<br/>
+
+```java
+@CircuitBreaker(name="apigw")
+public class LoggingWebFilter implements WebFilter {
+```  
+
+
+<br/>
+
 Spring Cloud Gateway를 실행하고 아래 url를 클릭하면 resilience4j_circuitbreaker 의 지표를 확인 할 수 있다.  
 - http://localhost:8080/actuator/prometheus   
 
@@ -227,6 +247,10 @@ resilience4j_circuitbreaker_not_permitted_calls_total{group="none",kind="not_per
 
 <br/>
 
+### TEST 하기  
+
+<br/>
+
 circuitbreaker 상태 보기는 아래 url 로 확인 할 수 있다.  
 - http://localhost:8080/actuator/circuitbreakers  
 
@@ -236,7 +260,30 @@ circuitbreaker 상태 보기는 아래 url 로 확인 할 수 있다.
 
 <br/>
 
-시간이 지나면 half-open 상태가 된다.  
+Talend API 로 먼저 로그인을 하고 token을 가져 온다.  
+
+<img src="./assets/circuitbreaker2.png" style="width: 80%; height: auto;"/>  
+
+<br/>
+
+Employee 서비스를 조회해 본다. 5번 호출하면 에러 메시지가 변경이 되는 것을 확인 할 수 있다.   
+
+
+<img src="./assets/circuitbreaker3.png" style="width: 80%; height: auto;"/>    
+
+<img src="./assets/circuitbreaker4.png" style="width: 80%; height: auto;"/>  
+
+<br/>
+
+Circuit 이 OPEN이 되었다.  
+
+```bash
+{"circuitBreakers":{"apigw":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"10.0%","slowCallRateThreshold":"60.0%","bufferedCalls":0,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"OPEN"}}}
+```  
+
+<br/>
+
+시간이 지나면 HALF_OPEN 으로 상태가 변경이 된다.  
 
 ```bash
 {"circuitBreakers":{"apigw":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"10.0%","slowCallRateThreshold":"60.0%","bufferedCalls":0,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"HALF_OPEN"}}}
@@ -244,7 +291,7 @@ circuitbreaker 상태 보기는 아래 url 로 확인 할 수 있다.
 
 <br/>
 
-설정이 시간되 되면 다시 closed 상태로 돌아온다.  
+설정이 시간이 되면 다시 CLOSED 상태로 돌아온다.  
 
 <br/>
 
