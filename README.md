@@ -256,7 +256,7 @@
     - Circuitbreaker 패턴 ( Resillience4J ) ( [가이드 문서보기](./circuitbreaker.md) ) 
     - Async 패턴
     - Openfeign  ( [가이드 문서보기](./openfeign.md) ) 
-    - Service Mesh 패턴 ( [가이드 문서보기](./service_mesh_patterns.md) ) 
+    - Service Mesh 패턴 ( [가이드 문서보기](./service_mesh_pattern.md) ) 
 
 
 18. Chapter 18: 8주차 ( Observability )
