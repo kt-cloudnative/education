@@ -43,7 +43,7 @@ CircuitBreaker 를 이해 하고 실습 할수 있다.
 
 <br/>
 
-Circuitbreak 슬라이딩 윈도우 기반으로 동작하며 아래 두가지 기능을 선택하여 사용 할 수 있습니다.
+Circuitbreaker 슬라이딩 윈도우 기반으로 동작하며 아래 두가지 기능을 선택하여 사용 할 수 있습니다.
 
 <br/>
 
@@ -158,6 +158,8 @@ management:
       enabled: true
     circuitbreakers: ## actuator 에서 circuit breaker 상태 확인
       enabled: true
+    ratelimiters:
+      enabled: true  
     web:
       exposure:
         include: "*"
@@ -191,32 +193,21 @@ Spring Cloud Gateway를 실행하고 아래 url를 클릭하면 resilience4j_cir
 - http://localhost:8080/actuator/prometheus   
 
 ```bash
-# HELP resilience4j_circuitbreaker_calls_seconds Total number of successful calls
-# TYPE resilience4j_circuitbreaker_calls_seconds summary
-resilience4j_circuitbreaker_calls_seconds_count{group="none",kind="ignored",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_sum{group="none",kind="ignored",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_count{group="none",kind="failed",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_sum{group="none",kind="failed",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_count{group="none",kind="successful",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_sum{group="none",kind="successful",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_count{group="none",kind="failed",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_sum{group="none",kind="failed",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_count{group="none",kind="ignored",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_sum{group="none",kind="ignored",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_count{group="none",kind="successful",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_sum{group="none",kind="successful",name="testcirguitbreaker",} 0.0
-# HELP resilience4j_circuitbreaker_calls_seconds_max Total number of successful calls
-# TYPE resilience4j_circuitbreaker_calls_seconds_max gauge
-resilience4j_circuitbreaker_calls_seconds_max{group="none",kind="ignored",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_max{group="none",kind="failed",name="testcirguitbreaker",} 0.0
-resilience4j_circuitbreaker_calls_seconds_max{group="none",kind="successful",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_max{group="none",kind="failed",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_max{group="none",kind="ignored",name="apigw",} 0.0
-resilience4j_circuitbreaker_calls_seconds_max{group="none",kind="successful",name="testcirguitbreaker",} 0.0
-# HELP resilience4j_circuitbreaker_failure_rate The failure rate of the circuit breaker
-# TYPE resilience4j_circuitbreaker_failure_rate gauge
-resilience4j_circuitbreaker_failure_rate{group="none",name="testcirguitbreaker",} -1.0
-resilience4j_circuitbreaker_failure_rate{group="none",name="apigw",} -1.0
+# HELP resilience4j_circuitbreaker_slow_calls The number of slow successful which were slower than a certain threshold
+# TYPE resilience4j_circuitbreaker_slow_calls gauge
+resilience4j_circuitbreaker_slow_calls{group="none",kind="successful",name="apigw",} 0.0
+resilience4j_circuitbreaker_slow_calls{group="none",kind="failed",name="apigw",} 0.0
+# HELP jvm_memory_used_bytes The amount of used memory
+# TYPE jvm_memory_used_bytes gauge
+jvm_memory_used_bytes{area="heap",id="G1 Survivor Space",} 1.0311296E7
+jvm_memory_used_bytes{area="heap",id="G1 Old Gen",} 3.4794496E7
+jvm_memory_used_bytes{area="nonheap",id="Metaspace",} 5.7461584E7
+jvm_memory_used_bytes{area="nonheap",id="CodeCache",} 1.214144E7
+jvm_memory_used_bytes{area="heap",id="G1 Eden Space",} 2097152.0
+jvm_memory_used_bytes{area="nonheap",id="Compressed Class Space",} 8149664.0
+# HELP resilience4j_circuitbreaker_not_permitted_calls_total Total number of not permitted calls
+# TYPE resilience4j_circuitbreaker_not_permitted_calls_total counter
+resilience4j_circuitbreaker_not_permitted_calls_total{group="none",kind="not_permitted",name="apigw",} 0.0
 ```  
 
 <br/>
@@ -240,12 +231,22 @@ circuitbreaker 상태 보기는 아래 url 로 확인 할 수 있다.
 - http://localhost:8080/actuator/circuitbreakers  
 
 ```bash
-{"circuitBreakers":{"apigw":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"60.0%","slowCallRateThreshold":"60.0%","bufferedCalls":0,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"},"testcirguitbreaker":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"60.0%","slowCallRateThreshold":"60.0%","bufferedCalls":0,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
+{"circuitBreakers":{"apigw":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"10.0%","slowCallRateThreshold":"60.0%","bufferedCalls":0,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"CLOSED"}}}
 ```  
 
 <br/>
 
+시간이 지나면 half-open 상태가 된다.  
 
+```bash
+{"circuitBreakers":{"apigw":{"failureRate":"-1.0%","slowCallRate":"-1.0%","failureRateThreshold":"10.0%","slowCallRateThreshold":"60.0%","bufferedCalls":0,"failedCalls":0,"slowCalls":0,"slowFailedCalls":0,"notPermittedCalls":0,"state":"HALF_OPEN"}}}
+```  
+
+<br/>
+
+설정이 시간되 되면 다시 closed 상태로 돌아온다.  
+
+<br/>
 
 ## 4. 참고
 
