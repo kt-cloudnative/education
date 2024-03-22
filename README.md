@@ -253,7 +253,7 @@
 
     - Cache 패턴 ( [가이드 문서보기](./cache-patterns.md) ) 
       - 소스 샘플 : https://github.com/kt-cloudnative/cache
-    - CircuitBreaker 패턴 ( Resillience4J )
+    - Circuitbreaker 패턴 ( Resillience4J ) ( [가이드 문서보기](./circuitbreaker.md) ) 
     - Async 패턴
     - Openfeign  ( [가이드 문서보기](./openfeign.md) ) 
     - Service Mesh 패턴 ( [가이드 문서보기](./service_mesh_patterns.md) ) 
@@ -263,4 +263,5 @@
 
      - Opensearch ( [가이드 문서보기](./opensearch.md) ) 
      - Elastic stack ( [가이드 문서보기](./elastic_stack.md) ) 
+     - Log Util 만들기
 

@@ -1,11 +1,10 @@
-# Istio ( Service Mesh )
+# Service Mesh ( Istio )
 
 <br/>
 
 Service Mesh 를 이해 하고 실습 할수 있다.   
 
 <br/>
-
 
 
 1. MSA  
