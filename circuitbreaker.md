@@ -1,15 +1,15 @@
 
-# CircuitBreak ( Resilience4j )
+# CircuitBreaker ( Resilience4j )
 
 <br/>
 
-CircuitBreak 를 이해 하고 실습 할수 있다.   
+CircuitBreaker 를 이해 하고 실습 할수 있다.   
 
 <br/>
 
 
 
-1. Circuitbreak  
+1. Circuitbreaker  
 
 2. Resilience4j
 
@@ -19,7 +19,7 @@ CircuitBreak 를 이해 하고 실습 할수 있다.
 
 <br/>
 
-## 1. Circuitbreak
+## 1. Circuitbreaker
 
 
 <br/>
@@ -172,19 +172,18 @@ resilience4j.circuitbreaker:
     default:
       registerHealthIndicator: true
       slidingWindowType: COUNT_BASED
-      slidingWindowSize: 10 # {통계건수}
-      minimumNumberOfCalls: 10 # {최소요청횟수}
-      failureRateThreshold: 60 # {실패율}
-      slowCallRateThreshold: 60 # {느린요청비율}
+      slidingWindowSize: 5 # 10 # {통계건수} : 서킷 CLOSE 상태에서 N회 호출 도달 시 failureRateThreshold 실패 비율 계산
+      minimumNumberOfCalls: 10 # {최소요청횟수} : 집계에 필요한 최소 호출 수
+      failureRateThreshold: 10 #60 # {실패율} : 실패 설정% 이상 시 서킷 오픈
+      slowCallRateThreshold: 60 # {느린요청비율} : 설정값 이상 소요 시 실패로 간주
       slowCallDurationThreshold: 3000 # {느린요청으로 간주할 시간}
-      permittedNumberOfCallsInHalfOpenState: 2
-      waitDurationInOpenState: 5s # {Circuit Breaker유지시간}
+      permittedNumberOfCallsInHalfOpenState: 2 # HALFOPEN -> CLOSE or OPEN 으로 판단하기 위해 호출 횟수
+      waitDurationInOpenState: 30s # 5s # {Circuit Breaker유지시간} : OPEN -> HALF-OPEN 전환 전 기다리는 시간
       eventConsumerBufferSize: 10
   instances:
     apigw:
       baseConfig: default
-    testcirguitbreaker:
-      baseConfig: default
+      timeout-duration: 3s # 요청 시간 제한
  ```  
 <br/>
 
