@@ -135,6 +135,17 @@ Resilience4j는 일련의 내결함성 패턴을 구현하고, 이러한 패턴�
 			<artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j
 			</artifactId>
 		</dependency>
+```    
+
+<br/>
+
+PSA 방식의 Annotation 사용시 AOP 추가     
+
+```bash
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
 ```  
 
 <br/>

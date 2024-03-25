@@ -58,6 +58,18 @@ FeignClient는 HTTP API 클라이언트를 단순화하는 것을 목표로 하�
 
 <br/>
 
+circuitbreaker 사용시 라이브러리 추가    
+
+```yaml
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+```  
+
+<br/>
+
 ### `@EnableFeignClients` annotation 추가
 
 <br/>
@@ -154,16 +166,17 @@ feign 에 대한 Global 설정을 한다.  별도 설정을 하지 않으면 def
 
 ```yaml
 # openfeign
-feign:
-  circuitbreaker:
-    enabled: false # api gw에서 적용하기 때문에 openfeign에서는 비활성화
-  client:
-    config:
-      default:
-        #logger-level: full
-        connectTimeout: 5000  # feign의 전역 timeout 설정 : 5초
-        readTimeout: 5000
-        loggerLevel: FULL ##basic
+cloud
+  openfeign:
+    circuitbreaker:
+      enabled: true # circuitbreak 사용시 추가
+    client:
+      config:
+        default:
+          #logger-level: full
+          connectTimeout: 5000  # feign의 전역 timeout 설정 : 5초
+          readTimeout: 5000
+          loggerLevel: FULL ##basic
 ``` 
 
 <br/>
