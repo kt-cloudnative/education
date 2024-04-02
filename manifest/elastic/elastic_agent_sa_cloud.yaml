@@ -5,7 +5,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: elastic-agent
-    namespace: edu
+    #namespace: edu
 roleRef:
   kind: ClusterRole
   name: elastic-agent-clusterrole-edu25
