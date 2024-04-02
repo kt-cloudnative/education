@@ -2418,3 +2418,44 @@ index 의 경우에는 yellow 상태를 볼수 있는데 이것도 single node�
 ```bash
 [root@bastion elastic]# helm upgrade elasticsearch elastic/elasticsearch -f values.yaml -n elastic
 ```
+
+<br/> 
+
+나중에 변경시에는 statefulset의 값을 수정한다.  
+
+<br/>
+
+```bash
+124               # If the node is starting up wait for the cluster to be ready (request params: "level=cluster" )
+125               # Once it has started only check that the node itself is responding
+126               START_FILE=/tmp/.es_start_file
+...
+165                 echo 'Waiting for elasticsearch cluster to become ready (request params: "level=cluster" )'
+166                 if http "/_cluster/health?level=cluster" "--fail" ; then
+167                   touch ${START_FILE}
+168                   exit 0
+169                 else
+170                   echo 'Cluster is not yet ready (request params: "level=cluster" )'
+171                   exit 1
+172                 fi
+173               fi
+```
+
+<br/>
+
+### x-pack disable 로 설정시
+
+<br/>
+
+`elasticsearch-master-config` configmap 에서 `xpack.security.enabled: false` 로 설정을 하면 `elasticsearch-master` statefulset yaml 화일에서 https를 http로 변경해야한다.  
+
+<br/>
+
+또한 환경 변수에서 아래 처럼 false로 되어 있는지 확인한다.  
+
+
+<img src="./assets/elastic_xpack_disable.png" style="width: 80%; height: auto;"/>
+
+<br/>
+
+kibana의 deployment 도 http 로 변경해야 한다.
