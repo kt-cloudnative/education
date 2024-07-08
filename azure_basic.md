@@ -34,7 +34,7 @@
 - Deployment Manifests : kustomize
 - GitOps Repo : Azure Repos / GitHub
 - CI : GitHub Action
-- CD : ArgoCD ()
+- CD : ArgoCD
 - Container Registry : Azure Container Registry ( ACR ) 
 - 배포 Target : Azure Kubernetes Service ( AKS )
 
