@@ -8,19 +8,19 @@
 
 <br/>
 
-1. CI 구성하기 ( By Github )
+1. CI 구성하기 (  Github Action )
 
-2. GitOps 구성 ( By Azure Repo )
+2. GitOps 구성 (  Azure Repo )
 
-3. AKS 구성
+3. AKS 구성 ( Azure Kubernetes Service Cluster )
 
-4. CD 구성하기 ( By ArgoCD )
+4. CD 구성하기 (  ArgoCD )
 
 
 
 <br/>
 
-## 1. CI 구성하기 ( By Github , Azure Container Registry ) 
+## 1. CI 구성하기 (  Github , Azure Container Registry ) 
 
 <br>
 
@@ -169,7 +169,7 @@ Azure Container Registry 에 이동을 하면  도커 이미지가 Push 된 것�
 
 <br/>
 
-## 2. GitOps 구성 ( By Azure Repo )
+## 2. GitOps 구성 ( Azure Repo )
 
 <br/>
 
@@ -330,7 +330,7 @@ review + create 버튼을 클릭하여 AKS Cluster 를 생성한다.
 <br/>
 
 
-### Cli 로 접속하기 ( For Mac)
+### Cli 로 접속하기 ( For Mac )
 
 <br/>
 
@@ -445,7 +445,7 @@ namespace/argocd created
 
 <br/>
 
-## 4. CD 구성하기 ( By ArgoCD )
+## 4. CD 구성하기 ( ArgoCD )
 
 
 <br/>
