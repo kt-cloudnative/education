@@ -20,6 +20,26 @@
 
 <br/>
 
+## 전체 구성
+
+<br/>
+
+<img src="./assets/cicd-gitops-architecture.png" style="width: 80%; height: auto;"/>  
+
+<br>
+
+구성요소
+
+- Source Repo : GitHub
+- Deployment Manifests : kustomize
+- GitOps Repo : Azure Repos / GitHub
+- CI : GitHub Action
+- CD : ArgoCD ()
+- Container Registry : Azure Container Registry ( ACR ) 
+- 배포 Target : Azure Kubernetes Service ( AKS )
+
+<br/>
+
 ## 1. CI 구성하기 (  Github , Azure Container Registry ) 
 
 <br>
