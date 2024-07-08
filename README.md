@@ -265,3 +265,16 @@
      - Elastic stack ( [가이드 문서보기](./elastic_stack.md) ) 
      - Log Util 만들기
 
+
+19. Chapter 19 : 9주차  ( Azure )
+     - Azure 기본 [ Hands-On 문서보기 ](./azure_basic.md)
+          - CI 구성하기 ( Github Action )
+          - GitOps 구성 (  Azure Repo )
+          - AKS 구성
+          - CD 구성하기 (  ArgoCD  )
+     - Azure 심화 ( 예정 ) [ Hands-On 문서보기 ](./azure_advanced.md)     
+          - CI 구성하기 (  Github Action with kustomize)
+          - Azure Event Hub ( Kafka ) 
+          - Azure Cache for redis
+          - CD 구성하기 ( vue.js +  SpringCloud Gateway + Spring MVC + RDS )
+          - 모니터링 ( DataDog )

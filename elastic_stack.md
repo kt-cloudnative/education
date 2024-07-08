@@ -2421,7 +2421,7 @@ index 의 경우에는 yellow 상태를 볼수 있는데 이것도 single node�
 
 <br/> 
 
-나중에 변경시에는 statefulset의 값을 수정한다.  
+나중에 변경시에는 statefulset의 값을 수정 ( 4군데 ) 한다.  
 
 <br/>
 
@@ -2458,4 +2458,4 @@ index 의 경우에는 yellow 상태를 볼수 있는데 이것도 single node�
 
 <br/>
 
-kibana의 deployment 도 http 로 변경해야 한다.
+추가적으로 kibana의 deployment 도 http 로 변경해야 한다.
