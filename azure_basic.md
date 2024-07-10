@@ -24,7 +24,7 @@
 
 <br/>
 
-<img src="./assets/cicd-gitops-architecture.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/cicd-gitops-architecture.png" style="width: 70%; height: auto;"/>  
 
 <br>
 
@@ -58,7 +58,7 @@ https://portal.azure.com/ 에 접속하여 container registry 를 검색을 하�
 Create 버튼을 클릭합니다.  
 
 
-<img src="./assets/acr_1.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/acr_1.png" style="width: 60%; height: auto;"/>  
 
 - resource group : 없으면 아래  new 버튼 클릭하여 생성
 - registry name : icishub ( 도커 이미지 앞에 icishub.azurecr.io 가 붙음 )
@@ -68,20 +68,20 @@ Create 버튼을 클릭합니다.
 Networking 설정에서는 무료 버전 임으로 아래와 같이 public 설정  
 -  public 이더라도 권한으로 제어가 되기 때문에 anonymous pull 은 불가능   
 
-<img src="./assets/acr_2.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/acr_2.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
 Encryption 은  disable 로 설정    
 
-<img src="./assets/acr_3.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/acr_3.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
 Tag는 생략하고 Review + create 를 클릭하여 생성합니다.
 `icishub` 라는 이름으로 레지스트리가 생성이 되었습니다.  
 
-<img src="./assets/acr_4.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/acr_4.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
@@ -89,13 +89,13 @@ Tag는 생략하고 Review + create 를 클릭하여 생성합니다.
 
 admin user를 체크하면 password 가 생성이 되고 github action에 사용하기 위해 복사합니다.   
 
-<img src="./assets/acr_5.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/acr_5.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
 Services -> Repositorys 에 보면 아직 도커 이미지가 생성되지 않을 것을 확인 할 수 있습니다. 
 
-<img src="./assets/acr_6.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/acr_6.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
@@ -158,7 +158,7 @@ jobs:
 
 Settings -> Secrets and variables -> Action -> New repository secret 클릭
 
-<img src="./assets/acr_7.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/acr_7.png" style="width: 60%; height: auto;"/>    
 
 - AZURE_URL : icishub.azurecr.io
 - ACR_USERNAME : icishub
@@ -168,24 +168,24 @@ Settings -> Secrets and variables -> Action -> New repository secret 클릭
 
 Action Tab 으로 이동하여 Publish Docker Azure image 를 선택합니다.      
 
-<img src="./assets/acr_8.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/acr_8.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Run workflow 를 선택을 하여 tag 에 v1를 입력합니다 ( 원하시는 Tag 명을 넣으시면 됩니다. )    
 
-<img src="./assets/acr_9.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/acr_9.png" style="width: 60%; height: auto;"/>    
 
 Workflow 를 Run 하면 노란색 아이콘이 보이고 클릭하면 자세한 빌드 내용을 볼수 있습니다.  
 시간이 경과하여 파란색 아이콘이 생성이 되면 빌드가 완료가 되면 push 까지 진행이 되었습니다.  
 
-<img src="./assets/acr_10.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/acr_10.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Azure Container Registry 에 이동을 하면  도커 이미지가 Push 된 것을 확인 할수 있습니다.   
 
-<img src="./assets/acr_11.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/acr_11.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
@@ -193,7 +193,7 @@ Azure Container Registry 에 이동을 하면  도커 이미지가 Push 된 것�
 
 <br/>
 
-MS는 Azure Repo 와 GitHub 통해 GitOps를 구현 할수 있지만 여기에서는 Azure Repo SaaS 서비스를 활용 해 본다. GitHub도 사용 방법은 유사하다.  
+MS는 Azure Repo 와 GitHub 통해 GitOps를 구현 할수 있지만 여기에서는 Azure Repo SaaS 서비스를 활용 해 본다. GitHub 도 사용 방법은 유사하다.  
 
 <br/>
 
@@ -201,19 +201,19 @@ https://dev.azure.com/ 에 로그인을 한다.
 
 New Project 버튼을 클릭하고 edu 라는 이름으로  Visibility는 private 로 설정하고 repository 를 생성한다.   
 
-<img src="./assets/azure_repo_1.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/azure_repo_1.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 생성된 Project 에서 Repos를 클릭하고 Files를 선택하면 Generate Git Credentials 버튼이 보이고 클릭을 하면 https/ssh 로 해당 Repository에 접속할 비밀번호를 생성 할 수 있다.
 
-<img src="./assets/azure_repo_2.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/azure_repo_2.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Https URL , 계정 , 비밀번호를 로컬 pc에 저장해 놓는다.    
 
-<img src="./assets/azure_repo_3.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/azure_repo_3.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
@@ -222,15 +222,49 @@ GitOps 폴더는 직접 구성해도 되지만 여기서는 기존에 개발되�
 import Repository 를 클릭하고 `https://github.com/shclub/edu1_gitops.git` 를 clone 합니다.
 
 
-<img src="./assets/azure_repo_4.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/azure_repo_4.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 시간이 약간 경과 된 후 아래와 같이 yaml 화일이 생성된 것을 확인 할 수 있습니다.  
 
-<img src="./assets/azure_repo_5.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/azure_repo_5.png" style="width: 60%; height: auto;"/>    
 
 <br/>
+
+deployment.yaml 와 kustomization.yaml 에서 본인의 도커 이미지로 변경합니다.    
+
+
+deployment.yaml
+```yaml
+...
+    spec:
+      containers:
+      - name: edu1
+        image: icishub.azurecr.io/shclub/edu1  # 본인의 이미지 이름으로 변경. tag는 설정하지 않음
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+```  
+
+<br/>
+
+
+kustomization.yaml
+```yaml
+...
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- service.yaml
+images:
+- name: icishub.azurecr.io/shclub/edu1 # 본인 이미지로 교체
+  newTag: "v1"  # Tag도 설정 . 향후 CI 진행시 Kustomize 방식 사용하면 자동으로 변경
+```  
+
+<br/>
+
 
 
 ## 3. AKS 구성
@@ -247,32 +281,32 @@ AKS는 Azure Kubernetes Service 의 약자로 Azure에서 Managed 하는 Kuberen
 
 https://portal.azure.com 에서 `aks` 로 검색을 한 후 `kubernetes service` 를 선택한다.
 
-<img src="./assets/aks_search.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/aks_search.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 AKS Cluster를 신규로 생성하기 위해서 Create 버튼을 클릭하고 Kubernetes cluster를 선택합니다.
 
-<img src="./assets/aks_2.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/aks_2.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Resource Group 을 설정하고  kubernetes 이름을 입력합니다.  
 
-<img src="./assets/aks_3.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_3.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 kubernetes 버전은 1.28.9(default)를 선택하고 인증 방식은 local account RBAC 을 선택합니다. 
 - 현재 사용하는 OKD 4.11 은 1.25 버전을 사용함  
 
-<img src="./assets/aks_4.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_4.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 Node Pool은 Woker node를 나타내며 Node Size를 클릭하여 Node에 대한 세부 설정을 할수 있습니다.
 
-<img src="./assets/aks_5.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_5.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
@@ -282,25 +316,25 @@ Node Pool은 Woker node를 나타내며 Node Size를 클릭하여 Node에 대한
    - 최소값 : 1
    - 최대값 : 2 ( 1 로 설정시 cpu 부족으로 argocd pod cpu 부족 현상 발생 )
 
-<img src="./assets/aks_6.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_6.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 worker node vm 사이즈는 가격이 저렴한 것중에서 memory가 높은 것을 선택  
 
-<img src="./assets/aks_6-1.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_6-1.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 변경이 완료 된 것을 확인 할 수 있다.  
 
-<img src="./assets/aks_6-2.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_6-2.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 worker node 당 pod의 갯수를 설정 한다.  
 
-<img src="./assets/aks_7.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_7.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
@@ -310,7 +344,7 @@ worker node 당 pod의 갯수를 설정 한다.
 - Network Polocy : Calico
 - Load Balancer : Standard
 
-<img src="./assets/aks_8.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_8.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
@@ -318,20 +352,20 @@ container registry는 기존에 생성된 registry를 입력하고 istio는 설�
 
 - registry를 설정하면 해당 registry 에서 worker node의 role이 assign 되어 registry의 image를 권한 없이 pull 할 수 있다. 
 
-<img src="./assets/aks_9.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_9.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 Container Registry 권한 확인  
 
-<img src="./assets/azr_argocd_7.png" style="width: 80%; height: auto;"/>
+<img src="./assets/azr_argocd_7.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 container log 활성화를 하고 cost preset은 cost-optimized를 선택한다.  
 
 
-<img src="./assets/aks_10.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_10.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
@@ -339,13 +373,13 @@ secret store CSI Driver를 ennable 시키면 kubernetes secret을 azure key vaul
 
 infrastructure resource group은 MC 라는 prefix로 생성이 된다.  
 
-<img src="./assets/aks_11.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_11.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 review + create 버튼을 클릭하여 AKS Cluster 를 생성한다.  
 
-<img src="./assets/aks_complete.png" style="width: 80%; height: auto;"/>
+<img src="./assets/aks_complete.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
@@ -378,13 +412,13 @@ jakelee@jake-MacBookAir ~ % az login
 
 명령어 실행 시 Azure에 로그인할 수 있는 웹 브라우저가 열리고 이미 로그인이 되어 있으면 아래 처럼 보입니다.
 
-<img src="./assets/azr_login_1.png" style="width: 80%; height: auto;"/>
+<img src="./assets/azr_login_1.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 tenent 번호를 입력합니다.  
 
-<img src="./assets/azr_login_2.png" style="width: 80%; height: auto;"/>
+<img src="./assets/azr_login_2.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
@@ -486,13 +520,13 @@ ArgoCD는 Kubernetes 에서 동작하기 때문에 AKS 에서 Settings -> `Exten
 
 <br/>
 
-<img src="./assets/argocd_aks_1.png" style="width: 80%; height: auto;"/>
+<img src="./assets/argocd_aks_1.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
 argocd 를 검색한 후 Create 버튼을 클릭합니다. 
 
-<img src="./assets/argocd_aks_2.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_2.png" style="width: 60%; height: auto;"/>  
 
 
 aks에서 검색하지 않고 portal 에서도 검색 할수도 있습니다. 
@@ -501,26 +535,26 @@ aks에서 검색하지 않고 portal 에서도 검색 할수도 있습니다.
 
 Bitnami 에서 제공하는 Argocd를 확인하고 Create 버튼을 클릭합니다.  
 
-<img src="./assets/argocd_aks_3.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_3.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
 Resource Group을 선택하고 AKS는 이미 존재 함으로 AKS는 생성하지 않습니다.
 
-<img src="./assets/argocd_aks_4.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_4.png" style="width: 60%; height: auto;"/>  
 
 
 <br/>
 
 Resource Group을 선택하고 AKS는 이미 존재 함으로 AKS는 생성하지 않습니다.
 
-<img src="./assets/argocd_aks_4.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_4.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
 설치 될 AKS 이름을 설정합니다. 
 
-<img src="./assets/argocd_aks_5.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_5.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
@@ -547,7 +581,7 @@ helm chart로 설치가 진행 된다.
 
 아래와 같이 설정 한다.
 
-<img src="./assets/argocd_aks_6.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_6.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
@@ -563,13 +597,13 @@ argocd1	argocd   	20      	2024-07-08 14:45:55.130680288 +0000 UTC	deployed	argo
 
 application parameters 클릭시 이동해서 key 값 찾기.
 
-<img src="./assets/argocd_aks_7.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_7.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
 설치 완료가 되면 아래와 같이 complete 가 된다.
 
-<img src="./assets/argocd_aks_8.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_8.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
@@ -601,7 +635,7 @@ pvc-7e254ade-d68a-45b9-a83d-18bf1dfe9d6c   8Gi        RWO            Delete     
 
 Market Place 용 ArgoCD는 아래 처럼 과금을 위한 설정이 된다.
 
-<img src="./assets/argocd_aks_9.png" style="width: 80%; height: auto;"/>  
+<img src="./assets/argocd_aks_9.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
@@ -623,7 +657,7 @@ argocd1-redis-master             ClusterIP      10.0.237.20    <none>          6
 
 AKS의 Argocd 설정에서 Configuration Setting 에서 추가로 parameter를 아래와 같이 추가 하고 Update 하면 `LoadBalancer` IP를 할당 받고 계속 유지가 된다.  
 
-<img src="./assets/argocd_aks_10.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_10.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
@@ -650,7 +684,7 @@ argocd1-redis-master             ClusterIP      10.0.237.20    <none>          6
 
 ArgoCD 로 로그인후 Settings-> CONNECT REPO를  클릭한다.  
 
-<img src="./assets/argocd_aks_11.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_11.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
@@ -662,25 +696,25 @@ ArgoCD 로 로그인후 Settings-> CONNECT REPO를  클릭한다.
 - Username : azure repo repository 에서 get credentials을 통해서 생성    
 - Password : azure repo repository 에서 get credentials을 통해서 생성    
 
-<img src="./assets/argocd_aks_12.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_12.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Connect 를 누르면 git url이 등록되고 Connection Stauts 가 successful 인것 을 확인 할 수 있다. 
 
-<img src="./assets/argocd_aks_13.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_13.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Applications -> NEW APP를 클릭한다.   
 
-<img src="./assets/argocd_aks_14.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_14.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 Application Name은 원하는 이름으로 설정하고 Project Name은  defaulf 로 선택한다.  
 
-<img src="./assets/argocd_aks_15.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_15.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
@@ -691,25 +725,25 @@ Application Name은 원하는 이름으로 설정하고 Project Name은  defaulf
 - Cluster URL : 현재 kubernetes  
 - Namespace : mvp ( 위에서 생성)  
 
-<img src="./assets/argocd_aks_16.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_16.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 kustomization.yaml 내용을 보여준다.  
 
-<img src="./assets/argocd_aks_17.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_17.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 생성된 App를 볼수 있고 Sync 버튼을 클릭한다.  
 
-<img src="./assets/argocd_aks_18.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_18.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
 SYNCHRONIZE RESOURCES 에 sync 할 리소스가 체크되어 있는지 확인하고 상단에 SYNCHRONIZE 버튼을 클릭한다.  
 
-<img src="./assets/argocd_aks_19.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_19.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
@@ -717,7 +751,7 @@ edu1 카드를 클릭하면 배포가 진행 되는 것을 확인 할 수 있다
 
 <br/>
 
-<img src="./assets/argocd_aks_20.png" style="width: 80%; height: auto;"/>    
+<img src="./assets/argocd_aks_20.png" style="width: 60%; height: auto;"/>    
 
 
 ```bash
@@ -779,7 +813,7 @@ jakelee@jake-MacBookAir aks_argocd % az aks update --name icisaks1 --resource-gr
 
 Container Registry 권한 확인  
 
-<img src="./assets/azr_argocd_7.png" style="width: 80%; height: auto;"/>
+<img src="./assets/azr_argocd_7.png" style="width: 60%; height: auto;"/>
 
 <br/>
 
