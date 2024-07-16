@@ -18,7 +18,12 @@
 
 5. Eventhub 구성  및 테스트 하기 
 
-6. Azure cache for Redis 구성 및 테스트 하기
+6. Azure cache for Redis 구성
+
+7. Azure DB for MySQL 구성 및 접속하기 
+
+8. Full Stack Application 배포 해 보기 
+
 
 <br/>
 
@@ -486,6 +491,12 @@ kubernetes resources -> Run command 를 클릭하고 아래에 명령어를 넣�
 
 <img src="./assets/azure_cloudshell_6.png" style="width: 60%; height: auto;"/>
 
+<br/>
+
+shell 로 접속하지 않고도 브라우저에서도 간단한 리소스들은 확인 가능 합니다.  
+
+<img src="./assets/azure_cloudshell_7.png" style="width: 60%; height: auto;"/>
+
 
 <br/>
 
@@ -932,6 +943,7 @@ Container Registry 권한 확인
 
 <br/>
 
+> [ Azure advanced Hands-On 문서로 넘어가기 ](./azure_advanced.md)     
 
 <br/>
 
