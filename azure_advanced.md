@@ -417,7 +417,7 @@ mvp_baseinfo_backend
     redis:
       host: icistr1.redis.cache.windows.net
       port: 6379
-      password: "ksy3xtIVJpYH9xxxxxxxxgOAzCaPCPiF8="
+      password: "xxxxxxYH9xxxxxxxxgOAzCaPCPiF8="
       ssl:
         enabled: false
       #azure:
@@ -435,7 +435,7 @@ mvp_custinfo_backend
     redis:
       host: icistr1.redis.cache.windows.net
       port: 6379
-      password: "ksy3xtIVJpYH9vMnpxxxxxxxxCaPCPiF8="
+      password: "xxxxxxxxxxxCaPCPiF8="
       ssl:
         enabled: false
       #azure:
