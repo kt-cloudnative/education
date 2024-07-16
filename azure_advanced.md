@@ -448,15 +448,10 @@ mvp_custinfo_backend
 mvp_ppon_pub_backend   
 - 개통 서비스 Publish
 - application-prd.yml
-  ```yaml
-  kafka:
-    bootstrap-servers: icistr1.servicebus.windows.net:9093 # 9093 포트 
-    properties:
-      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://icistr1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MZSMumxxxxxxv8=";
-      sasl.mechanism: PLAIN
-      security.protocol: SASL_SSL
-    topics: ppon
-  ```
+  - eventhub 가 443 포트 이지만 kafka 설정 시에는 9093 으로 설정  
+
+    <img src="./assets/azure_kafka_config_1.png" style="width: 80%; height: auto;"/>  
+
 - pom.xml : eventhub 연동을 위해서는 spring-cloud-azure-starter 추가 필요
   ```xml
 		<!-- Azure -->
@@ -482,17 +477,11 @@ mvp_ppon_pub_backend
 mvp_ppon_sub_backend   
 - 개통 서비스 subscribe
 - application-prd.yml
-  ```yaml
-    kafka:
-      bootstrap-servers: icistr1.servicebus.windows.net:9093 # 포트 확인
-      properties:
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://icistr1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MZSMumxxxxxxK8zMv8=";
-        sasl.mechanism: PLAIN
-        security.protocol: SASL_SSL
-      consumer:
-        group-id: ppon #$Default # consumer group id는 eventhub ppon topic 에서 미리 생성
-      topics: ppon
-  ```   
+  - eventhub 가 443 포트 이지만 kafka 설정 시에는 9093 으로 설정  
+  - consumer group id는 eventhub ppon topic 에서 미리 생성  
+
+    <img src="./assets/azure_kafka_config_2.png" style="width: 80%; height: auto;"/>
+
 - pom.xml : eventhub 연동을 위해서는 spring-cloud-azure-starter 추가 필요
   ```xml
 		<!-- Azure -->
