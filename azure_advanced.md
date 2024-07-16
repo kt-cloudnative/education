@@ -452,7 +452,7 @@ mvp_ppon_pub_backend
   kafka:
     bootstrap-servers: icistr1.servicebus.windows.net:9093 # 9093 포트 
     properties:
-      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://icistr1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MZSMum6xrQUtSEvyb80t9VMEcfROB0kOx+AEhK8zMv8=";
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://icistr1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MZSMumxxxxxxv8=";
       sasl.mechanism: PLAIN
       security.protocol: SASL_SSL
     topics: ppon
@@ -486,7 +486,7 @@ mvp_ppon_sub_backend
     kafka:
       bootstrap-servers: icistr1.servicebus.windows.net:9093 # 포트 확인
       properties:
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://icistr1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MZSMum6xrQUtSEvyb80t9VMEcfROB0kOx+AEhK8zMv8=";
+        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="$ConnectionString" password="Endpoint=sb://icistr1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MZSMumxxxxxxK8zMv8=";
         sasl.mechanism: PLAIN
         security.protocol: SASL_SSL
       consumer:
