@@ -16,7 +16,9 @@
 
 4. CD 구성하기 (  ArgoCD )
 
+5. Eventhub 구성  및 테스트 하기 
 
+6. Azure cache for Redis 구성 및 테스트 하기
 
 <br/>
 
@@ -40,17 +42,28 @@
 
 <br/>
 
+> 사내 Private Cloud vs Azure Public Cloud  
+
+<br/>
+
+| 구분 | Source Repo | GitOps Repo | CI | CD | Container Registry | 컨테이너플랫폼 | MessageBroker | Cache
+|:--------| :-----|:----|  :----|  :----| :----| :----| :----| :----|  
+| 사내 Private Cloud | GitLab | GitLab | Jenkins | Jenkins/ArgoCD | Nexus | FlyingCube 2.0(OKD 11) | Kafka | Redis
+| Azure Public Cloud | Github | Github/Azure Devops | Github Action | ArgoCD | Azure Container Registry | AKS (K8S 1.28.9) | EventHub | Azure Cache for Redis
+
+<br/>
+
 ## 1. CI 구성하기 (  Github , Azure Container Registry ) 
 
 <br>
 
-CI 구성은 Jenkins 대신 빠르게 진행하기 위하여 GitHub Action 을 사용 합니다.  
+CI 구성은 Jenkins 대신하여 빠르게 진행하기 위하여 GitHub Action 을 사용 합니다.  
 
-Github Action 을 사용하기 전에 ACR ( Azure Container Registry )  에 private registry 를 생성합니다. 
+Github Action 을 사용하기 전에 도커 이미지를 저장하기 위한 ACR ( Azure Container Registry ) 에 private registry 를 생성합니다. 
 
 <br/>
 
-###  Container Registry 생성하기
+###  ACR ( Azure Container Registry ) 생성하기
 
 <br/>
 
@@ -60,13 +73,13 @@ Create 버튼을 클릭합니다.
 
 <img src="./assets/acr_1.png" style="width: 60%; height: auto;"/>  
 
-- resource group : 없으면 아래  new 버튼 클릭하여 생성
-- registry name : icishub ( 도커 이미지 앞에 icishub.azurecr.io 가 붙음 )
+- resource group : 없으면 아래  new 버튼 클릭하여 생성 ( 리소스 그룹은 모든 리소스의 최상단에 위치 할 수 있습니다.)  
+- registry name : < 원하는 이름으로 기입 > ( 도커 이미지 앞에 <registry name>.azurecr.io 가 붙음 )
 
 <br/>
 
-Networking 설정에서는 무료 버전 임으로 아래와 같이 public 설정  
--  public 이더라도 권한으로 제어가 되기 때문에 anonymous pull 은 불가능   
+Networking 설정에서는 무료 버전 임으로 아래와 같이 public 으로 설정됨    
+-  public 으로 설정하더라도 권한으로 제어가 되기 때문에 anonymous pull 은 불가능   
 
 <img src="./assets/acr_2.png" style="width: 60%; height: auto;"/>  
 
@@ -87,17 +100,15 @@ Tag는 생략하고 Review + create 를 클릭하여 생성합니다.
 
 `icishub` 를 클릭하고 Setting -> Access keys 로 이동합니다.  
 
-admin user를 체크하면 password 가 생성이 되고 github action에 사용하기 위해 복사합니다.   
+admin user를 체크하면 password 가 생성이 되고 github action에 사용하기 위해 비밀번호를 복사하여 저장합니다.     
 
 <img src="./assets/acr_5.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
-Services -> Repositorys 에 보면 아직 도커 이미지가 생성되지 않을 것을 확인 할 수 있습니다. 
+Services -> Repositorys 에 보면 아직 도커 이미지가 아무것도 없는 것을 확인 할 수 있습니다. 
 
 <img src="./assets/acr_6.png" style="width: 60%; height: auto;"/>  
-
-<br/>
 
 <br/>
 
@@ -105,11 +116,18 @@ Services -> Repositorys 에 보면 아직 도커 이미지가 생성되지 않�
 
 <br/>
 
-`https://github.com/shclub/edu1` 를 본인의 github 계정에 포크 하고 포크된 본인의 github 계정의 `edu1` 의  `.github/workflows` 폴더로 이동합니다.    
+이제 CI를 하기 위해서 github의 아래 url를 웹 브라우저에 붙여넣기 합니다.  
+
+`https://github.com/shclub/edu1` 를 Fork 버튼을 클릭하여 본인의 github 계정에 Fork 하고 포크된 본인의 github 계정의 `edu1` repository에 가서   `.github/workflows` 폴더로 클릭하여 이동합니다.    
 
 <br/>
+ 
+해당 폴더 밑에 아래 와 같이 docker_azure.yaml 화일을 생성합니다.     
+- 아래는 github action 의  yaml 화일이고 소스를 가져와서 도커 이미지를 만들고 ACR에 push 하는 예제입니다.         
+- 도커 이미지를 생성하기 위해서는 최상위 폴더에 Dockerfile 이 있어야 합니다.  
+- Github 는 기본적으로 ubuntu 를 CI 할때 사용 합니다.
 
-아래 와 같이 docker_azure.yaml 화일을 생성합니다.
+<br/>
 
 ```yaml
 name: Publish Docker Azure image
@@ -154,15 +172,15 @@ jobs:
 
 <br/>
 
-화일을 생성 후에 3가지 변수를 secret 저장합니다. 아래의 단계로 진행 합니다.  
+화일을 생성 후에 3가지 변수를 repository 의 secret 에 저장합니다. 아래의 단계로 진행 합니다.    
 
 Settings -> Secrets and variables -> Action -> New repository secret 클릭
 
 <img src="./assets/acr_7.png" style="width: 60%; height: auto;"/>    
 
-- AZURE_URL : icishub.azurecr.io
-- ACR_USERNAME : icishub
-- ACR_PASSWORD : icishub 패스워드  
+- AZURE_URL : <본인의 acr registry name>.azurecr.io
+- ACR_USERNAME : 계정 이름
+- ACR_PASSWORD : 계정의 비밀번호  
 
 <br/>
 
@@ -172,9 +190,11 @@ Action Tab 으로 이동하여 Publish Docker Azure image 를 선택합니다.
 
 <br/>
 
-Run workflow 를 선택을 하여 tag 에 v1를 입력합니다 ( 원하시는 Tag 명을 넣으시면 됩니다. )    
+Run workflow 를 선택을 하여 tag 에 `v1` 를 입력합니다 ( 원하시는 Tag 명을 넣으시면 됩니다. )    
 
 <img src="./assets/acr_9.png" style="width: 60%; height: auto;"/>    
+
+<br/>
 
 Workflow 를 Run 하면 노란색 아이콘이 보이고 클릭하면 자세한 빌드 내용을 볼수 있습니다.  
 시간이 경과하여 파란색 아이콘이 생성이 되면 빌드가 완료가 되면 push 까지 진행이 되었습니다.  
@@ -183,23 +203,27 @@ Workflow 를 Run 하면 노란색 아이콘이 보이고 클릭하면 자세한 
 
 <br/>
 
-Azure Container Registry 에 이동을 하면  도커 이미지가 Push 된 것을 확인 할수 있습니다.   
+Azure Portal 로 이동을 하여 Azure Container Registry 에 가면  도커 이미지가 Push 된 것을 확인 할수 있습니다.     
 
 <img src="./assets/acr_11.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
-## 2. GitOps 구성 ( Azure Repo )
+도커 이미지가 생성이 되었고 Push 가 되었기 때문에 CI 는 완료가 되었습니다.
 
 <br/>
 
-MS는 Azure Repo 와 GitHub 통해 GitOps를 구현 할수 있지만 여기에서는 Azure Repo SaaS 서비스를 활용 해 본다. GitHub 도 사용 방법은 유사하다.  
+## 2. GitOps 구성 ( Azure DevOps Azure Repo )
 
 <br/>
 
-https://dev.azure.com/ 에 로그인을 한다.    
+Microsoft는 Azure Repo 와 GitHub 통해 GitOps를 구현 할수 있지만 여기에서는 Azure Repo SaaS 서비스를 활용 해 본다. GitHub 도 사용 방법은 유사하다.  
 
-New Project 버튼을 클릭하고 edu 라는 이름으로  Visibility는 private 로 설정하고 repository 를 생성한다.   
+<br/>
+
+`https://dev.azure.com/` 에 로그인을 한다.    
+
+New Project 버튼을 클릭하고 edu 라는 이름으로  Visibility는 `private` 로 설정하고 repository 를 생성한다.   
 
 <img src="./assets/azure_repo_1.png" style="width: 60%; height: auto;"/>    
 
@@ -211,13 +235,13 @@ New Project 버튼을 클릭하고 edu 라는 이름으로  Visibility는 privat
 
 <br/>
 
-Https URL , 계정 , 비밀번호를 로컬 pc에 저장해 놓는다.    
+Https URL , 계정 , 비밀번호를 로컬 pc에 저장해 놓습니다.  
 
 <img src="./assets/azure_repo_3.png" style="width: 60%; height: auto;"/>    
 
 <br/>
 
-GitOps 폴더는 직접 구성해도 되지만 여기서는 기존에 개발되어 있던 gitops repository를 clone 하도록 합니다.  
+GitOps 폴더는 직접 구성해도 되지만 여기서는 기존에 개발되어 있던 gitops repository 를 clone 하도록 합니다.    
 
 import Repository 를 클릭하고 `https://github.com/shclub/edu1_gitops.git` 를 clone 합니다.
 
@@ -232,8 +256,9 @@ import Repository 를 클릭하고 `https://github.com/shclub/edu1_gitops.git` �
 
 <br/>
 
-deployment.yaml 와 kustomization.yaml 에서 본인의 도커 이미지로 변경합니다.    
+deployment.yaml 와 kustomization.yaml 에서 본인의 도커 이미지로 변경합니다.      
 
+<br/>
 
 deployment.yaml
 ```yaml
@@ -250,7 +275,7 @@ deployment.yaml
 <br/>
 
 
-kustomization.yaml
+kustomization.yaml  
 ```yaml
 ...
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -265,13 +290,17 @@ images:
 
 <br/>
 
-
-
-## 3. AKS 구성
+여기 까지 진행이 되면 CD 준비가 완료가 되었습니다.  
 
 <br/>
 
-AKS는 Azure Kubernetes Service 의 약자로 Azure에서 Managed 하는 Kuberens Service 입니다.   
+## 3. AKS ( Azure Kubernetes Service ) 구성
+
+<br/>
+
+AKS는 Azure Kubernetes Service 의 약자로 Azure에서 Managed 하는 Kubernetes Service 입니다.     
+
+컨테이너 이미지를 배포 하기 위해 AKS 클러스터를 하나 생성 해야 합니다.  
 
 <br/>
 
@@ -291,7 +320,7 @@ AKS Cluster를 신규로 생성하기 위해서 Create 버튼을 클릭하고 Ku
 
 <br/>
 
-Resource Group 을 설정하고  kubernetes 이름을 입력합니다.  
+Resource Group 을 설정하고 원하시는 kubernetes 이름을 입력합니다.  
 
 <img src="./assets/aks_3.png" style="width: 60%; height: auto;"/>
 
@@ -338,11 +367,11 @@ worker node 당 pod의 갯수를 설정 한다.
 
 <br/>
 
-테스트 환경이기 때문에 AKS는 Public 으로 오픈하여 외부에서 k8S API를 호출 할 수 있도록 한다.
+테스트 환경이기 때문에 AKS는 Public 으로 오픈하여 외부에서 k8S API를 호출 할 수 있도록 한다.  
 
 - cni : Azure CNI
 - Network Polocy : Calico
-- Load Balancer : Standard
+- Load Balancer : Standard ( Free Tier 에서 LoadBalancer IP는 최대 3개 할당 됨 . 워커 노드에는 최대 2개만 가능 )  
 
 <img src="./assets/aks_8.png" style="width: 60%; height: auto;"/>
 
@@ -380,6 +409,101 @@ infrastructure resource group은 MC 라는 prefix로 생성이 된다.
 review + create 버튼을 클릭하여 AKS Cluster 를 생성한다.  
 
 <img src="./assets/aks_complete.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+
+### Cli 로 접속하기 ( 웹으로 접속 )
+
+<br/>
+
+웹 브라우저를 통하여 터미널 환경을 사용 할 수 있습니다. ( 랜딩존 환경에서는 오픈 불가 )  
+
+생성된 AKS 상단에 Cloud Shell 버튼을 클릭합니다.   
+
+<img src="./assets/azure_cloudshell_1.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+브라우저 하단에 검은색 화면이 나타나면 shell prompt 가 뜰때 까지 기다립니다.
+
+azure에 로그인을 하기 위해 아래 명령어를 입력합니다.  
+
+<br/>
+
+```bash
+az login
+```  
+
+<br/>
+
+하단에 보면 로그인을 위한 방법이 나와 있습니다. 해당 URL을 복사하여 웹브라우저 새 탭을 띄웁니다.  
+
+<img src="./assets/azure_cloudshell_2.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+앞 화면에서 나온 코드를 복사하여 붙여 넣기 하고 Next 버튼을 클릭합니다.  
+계정을 선택하고 진행하면 완료 화면이 나옵니다.    
+
+<img src="./assets/azure_cloudshell_3.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+Subscription 을 선택하는 화면이 나오면 Free Tier 인 번호 1번을 입력합니다.  
+
+<img src="./assets/azure_cloudshell_4.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+아래 화면이 나오면 정상적으로 로그인이 되고 kubernetes cli 명령을 사용 할 수 있습니다.  
+
+<img src="./assets/azure_cloudshell_5.png" style="width: 60%; height: auto;"/>
+
+<br/>
+
+위에서 생성한 AKS Cluster에 접속합니다.  
+- az aks get-credentials --resource-group `<resource group>` --name `<aks cluster name>`  
+
+
+<br/>
+
+```bash
+lee [ ~ ]$ az aks get-credentials --resource-group icis-poc-0 --name icisaks1
+Merged "icisaks1" as current context in /home/lee/.kube/config
+```  
+
+<br/>
+
+node를 조회해 보면 worker node 2개가 생성 되어 있는 것을 확인 할수 있습니다.
+
+```bash
+lee [ ~ ]$ kubectl get nodes -o wide
+NAME                                STATUS   ROLES   AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+aks-agentpool-36747243-vmss000000   Ready    agent   11d   v1.28.9   10.224.0.4     <none>        Ubuntu 22.04.4 LTS   5.15.0-1066-azure   containerd://1.7.15-1
+aks-agentpool-36747243-vmss000002   Ready    agent   8d    v1.28.9   10.224.0.113   <none>        Ubuntu 22.04.4 LTS   5.15.0-1066-azure   containerd://1.7.15-1
+lee [ ~ ]$ 
+```  
+<br/>
+
+namespace list 를 확인합니다.  
+
+```bash
+lee [ ~ ]$ kubectl get namespaces
+NAME                            STATUS   AGE
+aks-command                     Active   4d3h
+argocd                          Active   8d
+azure-extensions-usage-system   Active   8d
+calico-system                   Active   11d
+default                         Active   11d
+gatekeeper-system               Active   11d
+kube-node-lease                 Active   11d
+kube-public                     Active   11d
+kube-system                     Active   11d
+mvp                             Active   8d
+tigera-operator                 Active   11d
+```  
+
 
 <br/>
 
@@ -469,6 +593,10 @@ tigera-operator     Active   3d14h
 
 <br/>
 
+### 배포 준비
+
+<br/>
+
 Azure Container Registry 를 확인합니다.  
 
 ```bash
@@ -478,6 +606,10 @@ AcrLoginServer
 ------------------
 icishub.azurecr.io
 ```  
+
+<br/>
+
+2개의 namespace 를 생성합니다.  
 
 <br/>
 
@@ -501,7 +633,6 @@ namespace/argocd created
 
 ## 4. CD 구성하기 ( ArgoCD )
 
-
 <br/>
 
 GitOps를 통하여 배포하기 위해 ArgoCD를 설치를 합니다.  
@@ -513,6 +644,10 @@ Azure 에는 ArgoCD Managed 서비스는 없고 Market Place 를 통해서 설�
 <br/>
 
 ### ArgoCD 설치
+
+<br/>
+
+ArgoCD는 GitOps를 구현 하는 솔루션으로 Flux 와 같이 가장 많이 사용하는 오픈 소스입니다.
 
 <br/>
 
@@ -528,7 +663,6 @@ argocd 를 검색한 후 Create 버튼을 클릭합니다.
 
 <img src="./assets/argocd_aks_2.png" style="width: 60%; height: auto;"/>  
 
-
 aks에서 검색하지 않고 portal 에서도 검색 할수도 있습니다. 
 
 <br/>
@@ -542,7 +676,6 @@ Bitnami 에서 제공하는 Argocd를 확인하고 Create 버튼을 클릭합니
 Resource Group을 선택하고 AKS는 이미 존재 함으로 AKS는 생성하지 않습니다.
 
 <img src="./assets/argocd_aks_4.png" style="width: 60%; height: auto;"/>  
-
 
 <br/>
 
@@ -558,9 +691,9 @@ Resource Group을 선택하고 AKS는 이미 존재 함으로 AKS는 생성하�
 
 <br/>
 
-helm chart로 설치가 진행 된다.  
+내부적으로 helm chart로 설치가 진행 되는것을 알 수 있습니다.  
 
-- Cluster extension Resource Name의 Helm의 release name  으로 설정이 되면 모든 k8s resource에 prefix로 설정 된다.
+- Cluster extension Resource Name은 Helm의 release name 으로 설정이 되면 모든 k8s resource에 prefix로 설정 된다.
 - installation namespace : argocd ( 위에서 생성함 )
 - application parameters : 클릭하면 argocd helm github로 이동하여 variable list를 보여준다.  
 - parameter key : helm values 에 set 하는 key를 선언
@@ -620,7 +753,7 @@ argocd1-redis-master-0                            1/1     Running   0          1
 
 <br/>
 
-오픈소스에서는 별도의 PV/PVC가 생성 되지 않지만 Azure Market Place의 Argocd는 dynamic provisioning 을 통하여 Redis 용 백업 PV/PVC가 자동으로 생성 된 것을 확인 할 수 있다.
+오픈소스에서는 별도의 PV/PVC가 생성 되지 않지만 Azure Market Place의 Argocd는 dynamic provisioning 을 통하여 Redis 용 백업 PV/PVC가 자동으로 생성 된 것을 확인 할 수 있다.  ( 오픈소스로 설치시 별도 설정이 필요하다.  )
 
 ```bash
 jakelee@jake-MacBookAir ~ % kubectl get pvc -n argocd
@@ -633,13 +766,13 @@ pvc-7e254ade-d68a-45b9-a83d-18bf1dfe9d6c   8Gi        RWO            Delete     
 
 <br/>
 
-Market Place 용 ArgoCD는 아래 처럼 과금을 위한 설정이 된다.
+MarketPlace 용 ArgoCD는 아래 처럼 과금을 위한 설정이 된다.
 
 <img src="./assets/argocd_aks_9.png" style="width: 60%; height: auto;"/>  
 
 <br/>
 
-서비스를 조회해 보면 이름 앞에 `argocd1` prefix 가 붙은 것을 확인 할 수 있고 `argo-cd-server` 서버가 `ClusterIP` Type으로 설정되어 외부에서 접속이 불가능하다.  
+서비스를 조회해 보면 이름 앞에 `argocd1` prefix 가 붙은 것을 확인 할 수 있고 `argo-cd-server` 서버가 `ClusterIP` Type으로 설정되어 외부에서 접속이 불가능하다.    
 
 ```bash
 jakelee@jake-MacBookAir ~ % kubectl get svc -n argocd
@@ -818,3 +951,28 @@ Container Registry 권한 확인
 <br/>
 
 
+<br/>
+
+## 5. Eventhub 구성  및 테스트 하기 
+
+
+<br/>
+
+Eventhub는 Azure의 MessageBroker Managed 서비스 입니다.
+kafka 는 아니지만 Kafka 라이브러리를 호환을 하기 때문에 기존 소스 변경 없이 config만 변경하면 그대로 사용이 가능 합니다.
+
+<br/>
+
+### EventHub 설정
+
+<br/>
+
+ArgoCD는 Kubernetes 에서 동작하기 때문에 AKS 에서 Settings -> `Extensions + applications` 로 이동한 후  Add 버튼을 클릭합니다.  
+
+portal 에서 Eventhub로 검색을 합니다.  
+
+<br/>
+
+<img src="./assets/azr_eventhub_1.png" style="width: 60%; height: auto;"/>
+
+<br/>
