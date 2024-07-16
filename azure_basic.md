@@ -427,40 +427,10 @@ review + create 버튼을 클릭하여 AKS Cluster 를 생성한다.
 
 브라우저 하단에 검은색 화면이 나타나면 shell prompt 가 뜰때 까지 기다립니다.
 
-azure에 로그인을 하기 위해 아래 명령어를 입력합니다.  
+현재 aks에서  shell 을 실행하면 별도 azure 로그인 과정은 필요 없습니다.  
 
 <br/>
 
-```bash
-az login
-```  
-
-<br/>
-
-하단에 보면 로그인을 위한 방법이 나와 있습니다. 해당 URL을 복사하여 웹브라우저 새 탭을 띄웁니다.  
-
-<img src="./assets/azure_cloudshell_2.png" style="width: 60%; height: auto;"/>
-
-<br/>
-
-앞 화면에서 나온 코드를 복사하여 붙여 넣기 하고 Next 버튼을 클릭합니다.  
-계정을 선택하고 진행하면 완료 화면이 나옵니다.    
-
-<img src="./assets/azure_cloudshell_3.png" style="width: 60%; height: auto;"/>
-
-<br/>
-
-Subscription 을 선택하는 화면이 나오면 Free Tier 인 번호 1번을 입력합니다.  
-
-<img src="./assets/azure_cloudshell_4.png" style="width: 60%; height: auto;"/>
-
-<br/>
-
-아래 화면이 나오면 정상적으로 로그인이 되고 kubernetes cli 명령을 사용 할 수 있습니다.  
-
-<img src="./assets/azure_cloudshell_5.png" style="width: 60%; height: auto;"/>
-
-<br/>
 
 위에서 생성한 AKS Cluster에 접속합니다.  
 - az aks get-credentials --resource-group `<resource group>` --name `<aks cluster name>`  
@@ -502,7 +472,19 @@ kube-public                     Active   11d
 kube-system                     Active   11d
 mvp                             Active   8d
 tigera-operator                 Active   11d
-```  
+```   
+
+<br/>
+
+> TIP : Cloud Shell 이 안된다면 ?  
+
+<br/>
+
+kubernetes resources -> Run command 를 클릭하고 아래에 명령어를 넣고 RUN 버튼을 누르면 kubectl 명령어를 사용 할수 있다.    
+
+<br/>
+
+<img src="./assets/azure_cloudshell_6.png" style="width: 60%; height: auto;"/>
 
 
 <br/>
