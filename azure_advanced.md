@@ -396,6 +396,35 @@ pponsub    ClusterIP      10.0.174.11    <none>           80/TCP         17h
 
 <br/>
 
+`https://github.com/azure-edu` 에 소스가 저장되어 있고 `private`으로 구성되어 있다.  
+
+<br/>
+
+소스 폴더 구조   
+
+```bash
+jakelee@jake-MacBookAir azure_edu % tree -d -L 2
+.
+├── mvp_apigw
+│   └── src
+├── mvp_baseinfo_backend
+│   └── src
+├── mvp_custinfo_backend
+│   └── src
+├── mvp_frontend
+│   ├── public
+│   └── src
+├── mvp_ppon_pub_backend
+│   └── src
+└── mvp_ppon_sub_backend
+    └── src
+
+14 directories
+```  
+
+<br/>
+
+
 ### API GW 서비스 
 
 <br/>
@@ -517,6 +546,155 @@ mvp_frontend
 
 <br/>
 
-웹 브라우저에서  ArgoCD로 접속한다.  
 
-https://github.com/azure-edu-gitops/mvp_gitops 에 따라서 배포한다.  
+`https://github.com/azure-edu-gtiops` 에 gitops manifest 가 저장되어 있고 `public`으로 구성되어 있다.  
+
+<br/>
+
+gitops 폴더 구조   
+
+```bash
+jakelee@jake-MacBookAir mvp_gitops % tree -d -L 4
+.
+├── charts
+│   ├── baseinfo_backend
+│   ├── custinfo_backend
+│   ├── gateway
+│   ├── ppon_pub_backend
+│   └── ppon_sub_backend
+└── frontend
+
+8 directories
+```
+
+
+<br/>
+
+우리는 app-of-apps 패턴을 사용하여 한번에 배포를 한다.     
+
+
+`https://github.com/azure-edu-gitops/app_of_apps.git` 에 app-of-apps  패턴 manifest 가 저장되어 있고 `public`으로 구성되어 있다.  
+  
+<br>
+
+폴더 구조  
+
+```bash
+jakelee@jake-MacBookAir app_of_apps % tree  -L 4
+.
+├── README.md
+├── application.yaml
+└── apps
+    ├── baseinfo.yaml
+    ├── custinfo.yaml
+    ├── frontend.yaml
+    ├── pponpub.yaml
+    └── pponsub.yaml
+
+2 directories, 7 files
+```  
+
+<br/>
+
+웹 브라우저에서  ArgoCD 로 접속한다.   
+
+`https://github.com/azure-edu-gitops/app_of_apps.git` 을 repository로 설정하고 배포를 진행한다.  
+
+<br/>
+
+완료가 되면 서비스별로 Card가 만들어지고 서비스별로 하나씩 manifest Sync 를 해준다.   
+
+
+<img src="./assets/azure_argocd_app_of_apps_1.png" style="width: 80%; height: auto;"/>
+
+
+<br/>
+
+정상적으로 배포가 되고 서비스를 조회해 보면 아래와 같이 EXTERNAL-IP 가 생성 된것을 볼수 있다.   
+
+```bash
+jakelee@jake-MacBookAir azure_edu % kubectl get svc -n mvp
+NAME       TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE
+frontend   LoadBalancer   10.0.161.33    52.231.185.134   80:31213/TCP   40h
+```  
+
+<br/>
+
+### Application 동작 확인
+
+<br/>
+
+웹 브라우저에서 frontend 서비스의 IP로 웹브라우저로 접속해 본다.    
+
+좀 있다가 아래와 같은 고객정보가 나타나면 접속이 성공된 것을 알 수 있다.  
+
+<img src="./assets/azure_mvp_frontend_1.png" style="width: 60%; height: auto;"/>  
+
+
+<br/>
+
+왼쪽 frame 에서 기본 정보를 클릭하여 화면을 이동한다.
+
+<img src="./assets/azure_mvp_frontend_2.png" style="width: 30%; height: auto;"/>  
+
+<br/>
+
+그룹명  `M00S` , 코드 `10` 으로 설정 하고 조회를 한다.   
+아래 데이터가 나오면 DB 조회가 성공하고 Redis 에 저장이 된다.  
+
+<img src="./assets/azure_mvp_frontend_3.png" style="width: 30%; height: auto;"/>    
+
+<br/>
+
+redis를 확인해본다.  
+
+<img src="./assets/azure_mvp_frontend_4_redis.png" style="width: 40%; height: auto;"/>  
+
+왼쪽 frame 에서 유선 전화를 클릭하여 화면을 이동한다.
+
+<img src="./assets/azure_mvp_frontend_5.png" style="width: 30%; height: auto;"/>  
+
+<br/>
+
+고객번호  `11111111111` 을 입력하고 고객 검증 버튼을 클릭한다.     
+성공 메시지가 나오는 것을 확인한다.      
+
+- ppon 서비스에서 custinfo 서비스를 조회를 하여 검증을하며 내부에는 openfeign 으로 구성  
+
+<img src="./assets/azure_mvp_frontend_6.png" style="width: 60%; height: auto;"/>  
+
+<br/>
+
+하단부에 저장 버튼을 클릭하면 고객정보가 저장이 된다.  
+- eventhub의 `ppon` topic에  publish 가 되고 subscribe가 되어 DB에 저장이 된다.   
+
+<img src="./assets/azure_mvp_frontend_7.png" style="width: 60%; height: auto;"/>  
+
+<br/>
+
+eventhub 에서 확인을 해본다. in/out이 `1`개씩 되어 있다.  
+
+<img src="./assets/azure_mvp_frontend_8_eventhub.png" style="width: 60%; height: auto;"/>  
+
+<br/>
+
+ArgoCD에서 pponsub Application 을 클릭하고 POD 를 클릭하면 로그를 볼수 있다.    
+
+
+<img src="./assets/azure_mvp_frontend_9.png" style="width: 60%; height: auto;"/>  
+
+<br/>
+
+아래 비지니스 로그에서 `ordNo` 값이 `d34ba273-a0f0-4` 인 것을  확인 할 수 있다.    
+
+```bash
+{"SERVICE":"","TYPE":"ONLINE","CATEGORY":"DEBUG","WORKFLOW":"","GLOBAL_NO":"","TRANSACTION_ID":"","TRACE_ID":"","ERROR_ID":"","DATE":"20240717091057110","SOURCE":"EvenHubPponListener.receiveMessage(32)","LOG_LEVEL":"INFO","MESSAGE":"[Kafka] Received message: {\"inDs\":{\"ordNo\":\"d34ba273-a0f0-4\",\"custName\":null,\"custId\":\"11111111111\",\"custNoType\":\"2\",\"addrText\":\"\",\"completedResvDateHh\":\"\",\"cntcTelNo\":\"\"}}"}
+```
+
+<br/>
+
+DB에서 확인을 합니다.  
+
+<img src="./assets/azure_mvp_frontend_10.png" style="width: 60%; height: auto;"/>  
+
+<br/>
