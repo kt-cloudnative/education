@@ -403,7 +403,7 @@ container log 활성화를 하고 cost preset은 cost-optimized를 선택한다.
 
 <br/>
 
-secret store CSI Driver를 ennable 시키면 kubernetes secret을 azure key vault 와 연동 할수 있다.    
+secret store CSI Driver를 enable 시키면 kubernetes secret을 azure key vault 와 연동 할수 있다.    
 
 infrastructure resource group은 MC 라는 prefix로 생성이 된다.  
 
