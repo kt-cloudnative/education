@@ -233,6 +233,7 @@ connect 하면 현재 redis cache에 저장된 데이터를 확인 할 수 있�
 <br/>
 
 Azure DB는 다양한 Database를 지원하며 우리가 사용할 수 있는 DB는 Postgres , MySQL , MS SQL 이다. ( Mariadb는 지원 안함 )   
+mysql은 8.x 이상을 지원 하고 있고 기본적으로 테이블 이름은 소문자로 생성이 되고 Azure 에서는  별도 설정이 불가능 하다. 
 
 <br/>
 
