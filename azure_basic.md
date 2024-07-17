@@ -928,7 +928,7 @@ Normal   Pulling    6m5s (x4 over 7m38s)    kubelet            Pulling image "ic
 Warning  Failed     6m5s (x4 over 7m38s)    kubelet            Failed to pull image "icishub.azurecr.io/cloudnative-mvp1-azure/mvp_apigw": [rpc error: code = NotFound desc = failed to pull and unpack image "icishub.azurecr.io/cloudnative-mvp1-azure/mvp_apigw:latest": failed to resolve reference "icishub.azurecr.io/cloudnative-mvp1-azure/mvp_apigw:latest": icishub.azurecr.io/cloudnative-mvp1-azure/mvp_apigw:latest: not found, failed to pull and unpack image "icishub.azurecr.io/cloudnative-mvp1-azure/mvp_apigw:latest": failed to resolve reference "icishub.azurecr.io/cloudnative-mvp1-azure/mvp_apigw:latest": failed to authorize: failed to fetch anonymous token: unexpected status from GET request to https://icishub.azurecr.io/oauth2/token?scope=repository%3Acloudnative-mvp1-azure%2Fmvp_apigw%3Apull&service=icishub.azurecr.io: 401 Unauthorized]
 ```  
 
-<br/>>
+<br/>
 
 해결 방법 : worker node에서 ACR 에 접속할 권한이 없기 때문에 권한을 할당 해야함.  
 
