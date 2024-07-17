@@ -943,30 +943,6 @@ Container Registry 권한 확인
 
 <br/>
 
-> [ Azure advanced Hands-On 문서로 넘어가기 ](./azure_advanced.md)     
-
-<br/>
-
-## 5. Eventhub 구성  및 테스트 하기 
-
-
-<br/>
-
-Eventhub는 Azure의 MessageBroker Managed 서비스 입니다.
-kafka 는 아니지만 Kafka 라이브러리를 호환을 하기 때문에 기존 소스 변경 없이 config만 변경하면 그대로 사용이 가능 합니다.
-
-<br/>
-
-### EventHub 설정
-
-<br/>
-
-ArgoCD는 Kubernetes 에서 동작하기 때문에 AKS 에서 Settings -> `Extensions + applications` 로 이동한 후  Add 버튼을 클릭합니다.  
-
-portal 에서 Eventhub로 검색을 합니다.  
-
-<br/>
-
-<img src="./assets/azr_eventhub_1.png" style="width: 60%; height: auto;"/>
+ [ Azure advanced Hands-On 문서로 넘어가기 ](./azure_advanced.md)     
 
 <br/>
