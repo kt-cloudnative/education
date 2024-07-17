@@ -18,7 +18,9 @@
 
 <br/>
 
-<img src="./assets/cicd-gitops-architecture.png" style="width: 70%; height: auto;"/>  
+우리가 구현하고자 하는 구성은 아래와 같다.  
+
+<img src="./assets/azure_full_app_architecture.png" style="width: 80%; height: auto;"/>  
 
 <br>
 
