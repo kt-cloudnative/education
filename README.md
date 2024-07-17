@@ -270,11 +270,10 @@
      - Azure 기본 [ Hands-On 문서보기 ](./azure_basic.md)
           - CI 구성하기 ( Github Action )
           - GitOps 구성 (  Azure Repo )
-          - AKS 구성
+          - AKS 구성 ( Azure Kubernetes Service Cluster )
           - CD 구성하기 (  ArgoCD  )
-     - Azure 심화 ( 예정 ) [ Hands-On 문서보기 ](./azure_advanced.md)     
-          - CI 구성하기 (  Github Action with kustomize)
-          - Azure Event Hub ( Kafka ) 
-          - Azure Cache for redis
-          - CD 구성하기 ( vue.js +  SpringCloud Gateway + Spring MVC + RDS )
-          - 모니터링 ( DataDog )
+     - Azure 심화  [ Hands-On 문서보기 ](./azure_advanced.md)     
+          - Eventhub 구성  및 테스트 하기
+          - Azure cache for Redis ( like Kafka ) 구성
+          - Azure DB for MySQL 구성 및 접속하기 
+          - Full Stack Application 배포 해 보기 ( vue.js +  SpringCloud Gateway + Spring MVC + EventHub + Redis + Azure DB )
